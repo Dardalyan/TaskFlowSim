@@ -76,9 +76,9 @@ public class Program
     {
         Dictionary<int, string> lineByLine = ReadLinesOfWorkFlow();
 
-        List<string> taskTypes = new List<string>();
-        List<string> jobTypes = new List<string>();
-        List<string> stations = new List<string>();
+        Dictionary<string, double> taskTypes = new Dictionary<string, double>();
+        Dictionary<string,double> jobTypes = new Dictionary<string,double>();
+        Dictionary<string,double> stations = new Dictionary<string,double>();
 
         //Line by line, this loop parses tasktypes, jobtypes and stations and put them into unique string lists.
         //If there is a problem in the file format, prints the warning.
@@ -86,19 +86,22 @@ public class Program
         foreach (var pairs in lineByLine)
         {
             columnCount++;
-            if (pairs.Value.ToLower().Contains("tasktypes"))
+            if (pairs.Value.Contains("TASKTYPES"))
             {
                 string line = pairs.Value;
                 line = line[0] == '(' ? line.Remove(0, 1) : line;
                 line = line[line.Length-1] == ')' ?  line.Remove(line.Length-1, 1) : line;
                 
+                // Parsing each data into a list
                 List<string> parsedLine = line.Split(" ").ToList();
+                // Temporary list to control number of occurance of the data in the original list. NOTE: in order to log just once !
                 List<string> tempParsedLine = new List<string>();
-                
                 
                 parsedLine.ForEach(i=> Console.Write(i+" "));
 
+                // Enumerator to move through the list item by item
                 IEnumerator<string> enumerator = parsedLine.GetEnumerator();
+                // To keep the previous data 
                 string prevData = parsedLine[0] == "TASKTYPES" ? parsedLine[0] : "";
                 
                 int rowCount = 0;
@@ -106,80 +109,109 @@ public class Program
                 while (enumerator.MoveNext())
                 {
                     tempParsedLine.Add(enumerator.Current);
+                    // Pass the first one (it is the title or the class name like TASKTYPES or STATIONS)
                     if (enumerator.Current.Equals("TASKTYPES"))
                     {
                         rowCount += "TASKTYPES".Length;
                         continue;
                     }
                     
-
+                    // Check the item whether the format of tasktypeID is correct or not
                     if (enumerator.Current.Contains('T') && !enumerator.Current[0].Equals('T'))
                     {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write($"\nWarning line:{columnCount} position:{rowCount} ->");
-                        Console.ResetColor();
-                        Console.Write($"Invalid Task ID {enumerator.Current}");
+                        LogWarning($"Invalid tasktypeID: {enumerator.Current}");
+                        
+                        // Correct the invalid tasktypeID 
+                        var charList = enumerator.Current.ToCharArray();
+                        
+                        // Adjusting the invalid tasktype ID
+                        string id = "T";
+                        foreach (var c in charList)
+                        {
+                            if (c != 'T')
+                                id += c;
+                        }
+                        taskTypes.Add(id,0.0);
                         rowCount += enumerator.Current.Length + 1;
                         prevData = enumerator.Current;
                         continue;
                     }
 
+                    // After the tasktypeID, if the current doesn't have 'T', then check whether the size number is unsigned or not.
                     if (!prevData.Equals("TASKTYPES") && prevData.Contains('T') && !enumerator.Current.Contains('T'))
                     {
-                        try
-                        {
-                            bool isNegative = enumerator.Current.Contains('-') && enumerator.Current[0] == '-';
-                            if (isNegative)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.Write($"\nWarning line:{columnCount} position:{rowCount} ->");
-                                Console.ResetColor();
-                                Console.Write($"Invalid Task Size for TaskID:{prevData} Size:{enumerator.Current}");
-                            }
 
-                            //double size = Convert.ToDouble(enumerator.Current);
-                            rowCount += enumerator.Current.Length + 1;
-                            prevData = enumerator.Current;
-                            continue;
+                        bool isNegative = enumerator.Current.Contains('-') && enumerator.Current[0] == '-';
+                        string unsignedSize = "";
+                        if (isNegative) 
+                        { 
+                            LogWarning($"Invalid Task Size for TaskID:{prevData} Size:{enumerator.Current}");
+                            // Adjusting the invalid size of the current task
+                            unsignedSize = enumerator.Current.Remove(0,1);
                         }
-                        catch (Exception e)
+                        else
                         {
-                            Console.WriteLine(e.Message);
+                            unsignedSize = enumerator.Current;
                         }
-                    }
-
-                    if (tempParsedLine.Count(i=>i == enumerator.Current) > 1)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write($"\nWarning -> ");
-                        Console.ResetColor();
-                        Console.Write($"The Task Type:{enumerator.Current} is listed more than one");
+                        double size = Convert.ToDouble(unsignedSize);
+                        
+                        // Check if that tasktypeID is defined in the dictionary, if it is, then update the value
+                        if (!taskTypes.Keys.Contains(prevData))
+                            taskTypes.Add(prevData, size);
+                        else taskTypes[prevData] = size;
+                        
                         rowCount += enumerator.Current.Length + 1;
                         prevData = enumerator.Current;
                         continue;
                     }
 
+                    // Check whether the current data is listed before or not
+                    if (tempParsedLine.Count(i=>i == enumerator.Current) > 1)
+                    {
+                        LogWarning($"The Task Type:{enumerator.Current} is listed more than one");
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        continue;
+                    }
+
+                    if(enumerator.Current.Contains('T'))
+                        taskTypes.Add(enumerator.Current,0.0);
+                    
                     prevData = enumerator.Current;
                     rowCount += enumerator.Current.Length + 1;
                    
 
                 }
+                Console.WriteLine("\nLog Of Adjusted TaskType Format");
+               foreach (var keyValuePair in taskTypes)
+               {
+                   Console.WriteLine(keyValuePair.Key +":"+ keyValuePair.Value);
+               }
+                
             }
-            else if (pairs.Value.ToLower().Contains("jobtypes"))
+            else if (pairs.Value.Contains("JOBTYPES"))
             {
                 
             }
-            else if (pairs.Value.ToLower().Contains("statıons") || pairs.Value.ToLower().Contains("stations"))
+            else if (pairs.Value.Contains("STATITONS"))
             {
                 
             }
             else
             {
-                throw new Exception("Wrong workflow text file format ! \nFile content cannot be parsed !");
+                //throw new Exception("\nWrong workflow text file format ! File content cannot be parsed !");
             }
             
         }
         
+    }
+
+    private static void LogWarning(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Write($"\nWarning -> ");
+        Console.ResetColor();
+        Console.Write(message);
     }
     
     
