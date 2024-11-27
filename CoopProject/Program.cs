@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Globalization;
 using CoopProject;
 
 public class Program
@@ -153,7 +154,10 @@ public class Program
                         {
                             unsignedSize = enumerator.Current;
                         }
-                        double size = Convert.ToDouble(unsignedSize);
+                        // To convert decimal data by seperated '.' correctly into a double 
+                        NumberFormatInfo provider = new NumberFormatInfo();
+                        provider.CurrencyDecimalSeparator = ".";
+                        double size = Convert.ToDouble(unsignedSize,provider);
                         
                         // Check if that tasktypeID is defined in the dictionary, if it is, then update the value
                         if (!taskTypes.Keys.Contains(prevData))
