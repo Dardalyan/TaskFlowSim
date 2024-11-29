@@ -78,7 +78,7 @@ public class Program
         Dictionary<int, string> lineByLine = ReadLinesOfWorkFlow();
 
         Dictionary<string, double> taskTypes = new Dictionary<string, double>();
-        Dictionary<string,double> jobTypes = new Dictionary<string,double>();
+        Dictionary<string,List<List<KeyValuePair<string,double>>>> jobTypes = new Dictionary<string,List<List<KeyValuePair<string,double>>>>();
         Dictionary<string,double> stations = new Dictionary<string,double>();
 
         //Line by line, this loop parses tasktypes, jobtypes and stations and put them into unique string lists.
@@ -120,19 +120,19 @@ public class Program
                     // Check the item whether the format of tasktypeID is correct or not
                     if (enumerator.Current.Contains('T') && !enumerator.Current[0].Equals('T'))
                     {
-                        LogWarning($"Invalid tasktypeID: {enumerator.Current}");
+                        LogWarning($"Invalid tasktypeID: {enumerator.Current}",rowCount,columnCount);
                         
                         // Correct the invalid tasktypeID 
                         var charList = enumerator.Current.ToCharArray();
                         
                         // Adjusting the invalid tasktype ID
-                        string id = "T";
+                        string adjustedID = "T";
                         foreach (var c in charList)
                         {
                             if (c != 'T')
-                                id += c;
+                                adjustedID += c;
                         }
-                        taskTypes.Add(id,0.0);
+                        taskTypes.Add(adjustedID,0.0);
                         rowCount += enumerator.Current.Length + 1;
                         prevData = enumerator.Current;
                         continue;
@@ -141,12 +141,11 @@ public class Program
                     // After the tasktypeID, if the current doesn't have 'T', then check whether the size number is unsigned or not.
                     if (!prevData.Equals("TASKTYPES") && prevData.Contains('T') && !enumerator.Current.Contains('T'))
                     {
-
                         bool isNegative = enumerator.Current.Contains('-') && enumerator.Current[0] == '-';
                         string unsignedSize = "";
                         if (isNegative) 
                         { 
-                            LogWarning($"Invalid Task Size for TaskID:{prevData} Size:{enumerator.Current}");
+                            LogWarning($"Invalid Task Size for TaskID:{prevData} Size:{enumerator.Current}",rowCount,columnCount);
                             // Adjusting the invalid size of the current task
                             unsignedSize = enumerator.Current.Remove(0,1);
                         }
@@ -172,7 +171,7 @@ public class Program
                     // Check whether the current data is listed before or not
                     if (tempParsedLine.Count(i=>i == enumerator.Current) > 1)
                     {
-                        LogWarning($"The Task Type:{enumerator.Current} is listed more than one");
+                        LogWarning($"The Task Type:{enumerator.Current} is listed more than one",rowCount,columnCount);
                         rowCount += enumerator.Current.Length + 1;
                         prevData = enumerator.Current;
                         continue;
@@ -186,18 +185,204 @@ public class Program
                    
 
                 }
-                Console.WriteLine("\nLog Of Adjusted TaskType Format");
-               foreach (var keyValuePair in taskTypes)
-               {
-                   Console.WriteLine(keyValuePair.Key +":"+ keyValuePair.Value);
-               }
+                Console.WriteLine("\nLog Of Adjusted TaskType Format"); 
+                // SHOWING THE RESULTS OF TASKTYPES
+                foreach (var keyValuePair in taskTypes)
+                {
+                    Console.WriteLine(keyValuePair.Key +":"+ keyValuePair.Value);
+                }
                 
             }
             else if (pairs.Value.Contains("JOBTYPES"))
             {
+                string line = pairs.Value;
+                line = line[0] == '(' ? line.Remove(0, 1) : line;
+                line = line[line.Length-1] == ')' ?  line.Remove(line.Length-1, 1) : line;
                 
+                
+                // Parsing each data into a list
+                List<string> parsedLine = line.Split("JOBTYPES ").ToList();
+                parsedLine.RemoveAt(0); // removes the first index -> which is ["JOBTYPES"]
+                Console.WriteLine(parsedLine[0]);
+
+                // Remove the ...) (... occurance except the first '(' and the last ')' 
+                parsedLine = parsedLine[0].Split(") (").ToList();
+                // remove the '('
+                parsedLine[0] = parsedLine[0].Remove(0, 1);
+                parsedLine[parsedLine.Count-1]= parsedLine[parsedLine.Count-1].Remove(parsedLine[parsedLine.Count-1].Length-1, 1);
+                
+                // Merge the seperated data into a string line
+                IEnumerator<string> enumerator = parsedLine.GetEnumerator();
+                line = "";
+                while (enumerator.MoveNext())
+                {
+                    line += enumerator.Current+" ";
+                }
+                
+                // Now like we did in the tasktypes we can move on 
+                parsedLine = line.Split(" ").ToList();
+                enumerator = parsedLine.GetEnumerator();
+                
+                // To keep the previous data 
+                string prevData = "";
+                int rowCount = "JOBTYPES".Length+1;
+                Dictionary<string,int> currentJobIDOccurance = new Dictionary<string, int>();
+                string currentJobID = "";// This will reset in each occurance of jobTypeID 
+                while (enumerator.MoveNext()  )
+                {
+                    
+                    // Adjusting JobTypeID if it has an invalid text format
+                    if (enumerator.Current.Contains('J') && !enumerator.Current[0].Equals('J'))
+                    {
+                        LogWarning($"Invalid jobTypeID: {enumerator.Current}",rowCount,columnCount);
+                        
+                        // Correct the invalid jobTypeID 
+                        var charList = enumerator.Current.ToCharArray();
+                        
+                        // Adjusting the invalid jobTypeID
+                        string adjustedID = "J";
+                        foreach (var c in charList)
+                        {
+                            if (c != 'J')
+                                adjustedID += c;
+                        }
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        currentJobID = adjustedID;
+                        // We check the occurence of each jobTypeID . EX: if J1 occures only once and J2 occurs 2 times then we hold {J1:1, J2:2} as a Dict.
+                        try
+                        {
+                            currentJobIDOccurance.Add(adjustedID,0);
+                        }
+                        catch
+                        {
+                            currentJobIDOccurance[adjustedID]++;
+                        }
+                        //Here we are trying to put jobtypeID into dictionary, if the key is already exist, then it throws an error. 
+                        try
+                        {
+                            jobTypes.Add(adjustedID, new List<List<KeyValuePair<string, double>>>());
+                            jobTypes[adjustedID].Add(new List<KeyValuePair<string, double>>());
+                        }
+                        //We do not need to catch error, only thing we are doing here adding another option for that jobtypeID
+                        catch
+                        {
+                            jobTypes[adjustedID].Add(new List<KeyValuePair<string, double>>());
+                        }
+                        continue;
+                    }
+                    // If there is no problem in jobTypeID format
+                    if (enumerator.Current.Contains('J') && enumerator.Current[0].Equals('J'))
+                    {
+                        // We check the occurence of each jobTypeID . EX: if J1 occures only once and J2 occurs 2 times then we hold {J1:0, J2:1} as a Dict.
+                        try
+                        {
+                            currentJobIDOccurance.Add(enumerator.Current,0);
+                        }
+                        catch
+                        {
+                            currentJobIDOccurance[enumerator.Current]++;
+                        } 
+                        //Here we are trying to put jobtypeID into dictionary, if the key is already exist, then it throws an error.                        try
+                        try
+                        {
+                            jobTypes.Add(enumerator.Current, new List<List<KeyValuePair<string, double>>>());
+                            jobTypes[enumerator.Current].Add(new List<KeyValuePair<string, double>>());
+                        }
+                        //We do not need to catch error, only thing we are doing here adding another option for that jobtypeID
+                        catch
+                        {
+                            jobTypes[enumerator.Current].Add(new List<KeyValuePair<string, double>>());
+                        }
+
+                        currentJobID = enumerator.Current;
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        continue;
+                    }
+                    
+                    // If taskTypeID doesn't exist in TaskTypes, we need to log the warning.
+                    if (!taskTypes.Keys.Contains(prevData) && prevData.Contains('T'))
+                    {
+                        LogWarning($"The taskTypeID:{prevData} is not declared in TaskTypes", rowCount,columnCount);
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        continue;
+                    }
+
+                    // If the current data is a taskTypeID, we need to add that id into sequence
+                    if (enumerator.Current.Contains("T") && enumerator.Current[0].Equals('T'))
+                    {
+                        //Console.WriteLine($"Occurance of {currentJobID}:"+  currentJobIDOccurance[currentJobID]);
+                        
+                        jobTypes[currentJobID][currentJobIDOccurance[currentJobID]]
+                            .Add(KeyValuePair.Create(enumerator.Current,taskTypes[enumerator.Current]));
+                            
+                    }
+                    
+                    
+                    // if the current doesn't have 'T' and 'J', then check whether the size number is unsigned or not.
+                    if (!prevData.Contains("J") && prevData.Contains('T') && !enumerator.Current.Contains('T'))
+                    {
+                        bool isNegative = enumerator.Current.Contains('-') && enumerator.Current[0] == '-';
+                        string unsignedSize = "";
+                        if (isNegative) 
+                        { 
+                            LogWarning($"Invalid Task Size for TaskID:{prevData} Size:{enumerator.Current}");
+                            // Adjusting the invalid size of the current task
+                            unsignedSize = enumerator.Current.Remove(0,1);
+                        }
+                        else
+                        {
+                            unsignedSize = enumerator.Current;
+                        }
+                        // To convert decimal data by seperated '.' correctly into a double 
+                        NumberFormatInfo provider = new NumberFormatInfo();
+                        provider.CurrencyDecimalSeparator = ".";
+                        double size = Convert.ToDouble(unsignedSize,provider);
+                        
+                        // We are tyring to find in jobTypes(currentJobTypeID : [n'th option] [found index of pair.Key matched with taskTypeID])
+                        // Then re-define that key-pair with {taskTypeID : size}
+                        jobTypes[currentJobID][currentJobIDOccurance[currentJobID]]
+                            [jobTypes[currentJobID][currentJobIDOccurance[currentJobID]]
+                                .FindIndex(pair => pair.Key == prevData)] = KeyValuePair.Create(prevData,size);
+
+                        /*Console.WriteLine("\n" + currentJobID +" "+ jobTypes[currentJobID][currentJobIDOccurance[currentJobID]]
+                            .Find(pair => pair.Key == prevData));*/
+                        
+                        
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        continue;
+                    }
+                    
+                    prevData = enumerator.Current;
+                    rowCount += enumerator.Current.Length + 1;
+                }
+                
+                Console.WriteLine();
+                foreach (var pair in jobTypes)
+                {
+                    foreach (var l in pair.Value)
+                    {
+                          // SHOWING THE RESULTS OF JOBTYPES
+                          //Console.WriteLine(pair.Key+":"+ $"Option {pair.Value.IndexOf(l)+1}");
+                           //Console.Write("[");
+                           foreach (var kv in l)
+                           {
+                               //Console.Write($" {kv.Key}:{kv.Value} ");
+                               if (kv.Value.Equals(0))
+                               {
+                                   LogWarning($"{kv.Key} has no default size, either a default size must be declared in TASKTYPE list or the size must be declared within the job.");
+                                   Console.WriteLine();
+                               }
+                           }
+                           //onsole.WriteLine("]");
+                         
+                    }
+                }
             }
-            else if (pairs.Value.Contains("STATITONS"))
+            else if (pairs.Value.Contains("STATIONS"))
             {
                 
             }
@@ -210,12 +395,17 @@ public class Program
         
     }
 
-    private static void LogWarning(string message)
+    private static void LogWarning(string message,int rowNum = 0 , int colNum = 0)
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write($"\nWarning -> ");
-        Console.ResetColor();
+        if(rowNum == 0 && colNum == 0)
+            Console.Write("\nWarning -> ");
+        else
+            Console.Write($"\nWarning in line {colNum} and {rowNum}th position -> ");
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
         Console.Write(message);
+        Console.ResetColor();
+
     }
     
     
