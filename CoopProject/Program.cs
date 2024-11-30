@@ -317,10 +317,8 @@ public class Program
                         
                         jobTypes[currentJobID][currentJobIDOccurance[currentJobID]]
                             .Add(KeyValuePair.Create(enumerator.Current,taskTypes[enumerator.Current]));
-                            
+                        
                     }
-                    
-                    
                     // if the current doesn't have 'T' and 'J', then check whether the size number is unsigned or not.
                     if (!prevData.Contains("J") && prevData.Contains('T') && !enumerator.Current.Contains('T'))
                     {
@@ -346,10 +344,6 @@ public class Program
                         jobTypes[currentJobID][currentJobIDOccurance[currentJobID]]
                             [jobTypes[currentJobID][currentJobIDOccurance[currentJobID]]
                                 .FindIndex(pair => pair.Key == prevData)] = KeyValuePair.Create(prevData,size);
-
-                        /*Console.WriteLine("\n" + currentJobID +" "+ jobTypes[currentJobID][currentJobIDOccurance[currentJobID]]
-                            .Find(pair => pair.Key == prevData));*/
-                        
                         
                         rowCount += enumerator.Current.Length + 1;
                         prevData = enumerator.Current;
@@ -360,27 +354,26 @@ public class Program
                     rowCount += enumerator.Current.Length + 1;
                 }
                 
-                Console.WriteLine();
+                // Look each jobtypeID
                 foreach (var pair in jobTypes)
-                {
-                    foreach (var l in pair.Value)
-                    {
-                          // SHOWING THE RESULTS OF JOBTYPES
-                          //Console.WriteLine(pair.Key+":"+ $"Option {pair.Value.IndexOf(l)+1}");
-                           //Console.Write("[");
-                           foreach (var kv in l)
-                           {
-                               //Console.Write($" {kv.Key}:{kv.Value} ");
-                               if (kv.Value.Equals(0))
-                               {
-                                   LogWarning($"{kv.Key} has no default size, either a default size must be declared in TASKTYPE list or the size must be declared within the job.");
-                                   Console.WriteLine();
-                               }
-                           }
-                           //onsole.WriteLine("]");
-                         
+                {   // We need to check each option of current jobTypeID.  example: J1 's 1st option [T1:1, T2:2, T3:3]
+                    foreach (var optionList in pair.Value)
+                    {   // Now we'll log and make it correct
+                        optionList.RemoveAll(keyValuePair =>
+                        {   // All pairs will be removed, if size is not declared in both taskTypes and jobTypes
+                            // In addition, we'll remove that taskType from taskTypes.
+                            var p =  keyValuePair.Value == 0;
+                            if (p)
+                            {   // If p is true, then we need to log 
+                                LogWarning($"{keyValuePair.Key} has no default size, either a default size must be declared in TASKTYPE list or the size must be declared within the job.");
+                                taskTypes.Remove(keyValuePair.Key);
+                            }
+                            return p;
+                        });
                     }
                 }
+
+
             }
             else if (pairs.Value.Contains("STATIONS"))
             {
@@ -390,7 +383,20 @@ public class Program
             {
                 //throw new Exception("\nWrong workflow text file format ! File content cannot be parsed !");
             }
-            
+        }
+        
+        Console.WriteLine();
+        foreach (var pair in jobTypes)
+        {
+            foreach (var optionList in pair.Value)
+            {
+                // SHOWING THE RESULTS OF JOBTYPES
+                Console.WriteLine(pair.Key+":"+ $"Option {pair.Value.IndexOf(optionList)+1}");
+                Console.Write("[");
+                foreach (var keyValuePair in optionList)
+                    Console.Write($" {keyValuePair.Key}:{keyValuePair.Value} ");
+                Console.WriteLine("]");
+            }
         }
         
     }
@@ -399,11 +405,11 @@ public class Program
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
         if(rowNum == 0 && colNum == 0)
-            Console.Write("\nWarning -> ");
+            Console.Write("Warning -> ");
         else
             Console.Write($"\nWarning in line {colNum} and {rowNum}th position -> ");
         Console.ForegroundColor = ConsoleColor.DarkYellow;
-        Console.Write(message);
+        Console.WriteLine(message);
         Console.ResetColor();
 
     }
