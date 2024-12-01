@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Collections;
 using System.Globalization;
 using CoopProject;
 
@@ -79,7 +80,7 @@ public class Program
 
         Dictionary<string, double> taskTypes = new Dictionary<string, double>();
         Dictionary<string,List<List<KeyValuePair<string,double>>>> jobTypes = new Dictionary<string,List<List<KeyValuePair<string,double>>>>();
-        Dictionary<string,double> stations = new Dictionary<string,double>();
+        Dictionary<string,Dictionary<string,string>> stations = new Dictionary<string,Dictionary<string,string>>();
 
         //Line by line, this loop parses tasktypes, jobtypes and stations and put them into unique string lists.
         //If there is a problem in the file format, prints the warning.
@@ -177,7 +178,7 @@ public class Program
                         continue;
                     }
 
-                    if(enumerator.Current.Contains('T'))
+                    if(enumerator.Current.Contains('T') )
                         taskTypes.Add(enumerator.Current,0.0);
                     
                     prevData = enumerator.Current;
@@ -195,33 +196,12 @@ public class Program
             }
             else if (pairs.Value.Contains("JOBTYPES"))
             {
-                string line = pairs.Value;
-                line = line[0] == '(' ? line.Remove(0, 1) : line;
-                line = line[line.Length-1] == ')' ?  line.Remove(line.Length-1, 1) : line;
-                
-                
-                // Parsing each data into a list
-                List<string> parsedLine = line.Split("JOBTYPES ").ToList();
-                parsedLine.RemoveAt(0); // removes the first index -> which is ["JOBTYPES"]
-                Console.WriteLine(parsedLine[0]);
-
-                // Remove the ...) (... occurance except the first '(' and the last ')' 
-                parsedLine = parsedLine[0].Split(") (").ToList();
-                // remove the '('
-                parsedLine[0] = parsedLine[0].Remove(0, 1);
-                parsedLine[parsedLine.Count-1]= parsedLine[parsedLine.Count-1].Remove(parsedLine[parsedLine.Count-1].Length-1, 1);
-                
-                // Merge the seperated data into a string line
-                IEnumerator<string> enumerator = parsedLine.GetEnumerator();
-                line = "";
-                while (enumerator.MoveNext())
-                {
-                    line += enumerator.Current+" ";
-                }
+                // removing paranthesis
+                string line = HandleParenthesis(pairs.Value,"JOBTYPES");
                 
                 // Now like we did in the tasktypes we can move on 
-                parsedLine = line.Split(" ").ToList();
-                enumerator = parsedLine.GetEnumerator();
+                List<string> parsedLine = line.Split(" ").ToList();
+                IEnumerator<string> enumerator = parsedLine.GetEnumerator();
                 
                 // To keep the previous data 
                 string prevData = "";
@@ -326,7 +306,7 @@ public class Program
                         string unsignedSize = "";
                         if (isNegative) 
                         { 
-                            LogWarning($"Invalid Task Size for TaskID:{prevData} Size:{enumerator.Current}");
+                            LogWarning($"Invalid Task Size for TaskID:{prevData} Size:{enumerator.Current}",rowCount,columnCount);
                             // Adjusting the invalid size of the current task
                             unsignedSize = enumerator.Current.Remove(0,1);
                         }
@@ -354,7 +334,10 @@ public class Program
                     rowCount += enumerator.Current.Length + 1;
                 }
                 
+                // Adjusting tasktypes and jobtypes
                 // Look each jobtypeID
+                // TODO: This part must be fixed ! We are not supposed to remove tasks if their sizes are not declared in anywhere !
+                /*
                 foreach (var pair in jobTypes)
                 {   // We need to check each option of current jobTypeID.  example: J1 's 1st option [T1:1, T2:2, T3:3]
                     foreach (var optionList in pair.Value)
@@ -365,18 +348,131 @@ public class Program
                             var p =  keyValuePair.Value == 0;
                             if (p)
                             {   // If p is true, then we need to log 
-                                LogWarning($"{keyValuePair.Key} has no default size, either a default size must be declared in TASKTYPE list or the size must be declared within the job.");
-                                taskTypes.Remove(keyValuePair.Key);
+                                LogWarning($"{keyValuePair.Key} has no default size, either a default size must be declared in TASKTYPE list or the size must be declared within the job.",rowCount,columnCount);
+                                
                             }
                             return p;
                         });
                     }
                 }
+                */
 
 
             }
             else if (pairs.Value.Contains("STATIONS"))
             {
+                string line = HandleParenthesis(pairs.Value, "STATIONS");
+                Console.WriteLine(line);
+                
+                // Now like we did in the jobtypes we can move on 
+                List<string> parsedLine = line.Split(" ").ToList();
+                IEnumerator<string> enumerator = parsedLine.GetEnumerator();
+
+                
+                // To keep the previous data 
+                string prevData = "";
+                int rowCount = "STATIONS".Length+1;
+                Dictionary<string,int> currentJobIDOccurance = new Dictionary<string, int>();
+                string currentStationID = "";// This will reset in each occurance of jobTypeID 
+                
+                //Later, we'll use this list to check whether the tasktype is not in any station but declared in TaskTypes !
+                List<string> taskTypesInStations = taskTypes.Keys.ToList(); 
+                
+                int i = 1;
+                while (enumerator.MoveNext())
+                {
+                    // Adjusting StationID if it has an invalid text format
+                    if (enumerator.Current.Contains('S') && !enumerator.Current[0].Equals('S'))
+                    {
+                        LogWarning($"Invalid stationID: {enumerator.Current}",rowCount,columnCount);
+                        
+                        // Correct the invalid StationID 
+                        var charList = enumerator.Current.ToCharArray();
+                        
+                        // Adjusting the invalid jobTypeID
+                        string adjustedID = "S";
+                        foreach (var c in charList)
+                        {
+                            if (c != 'S')
+                                adjustedID += c;
+                        }
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        currentStationID = adjustedID;
+                        
+                        // When we find a station id, we need to start holding information
+                        stations.Add(adjustedID,new Dictionary<string, string>());
+                        i = 1;
+                        continue;
+                    }
+                    
+                    // If there is no problem in stationID format
+                    if (enumerator.Current.Contains('S') && enumerator.Current[0].Equals('S'))
+                    {
+                        currentStationID = enumerator.Current;
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        
+                        // When we find a station id, we need to start holding information
+                        stations.Add(currentStationID,new Dictionary<string, string>());
+                        i = 1;
+                        continue;
+                    }
+
+                    if (i == 1)
+                    {
+                        stations[currentStationID].Add("max_capacity",enumerator.Current);
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        i++;
+                        continue;
+                    }
+                    if (i == 2)
+                    {
+                        stations[currentStationID].Add("MULTIFLAG",enumerator.Current);
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        i++;
+                        continue;
+                    }
+                    if (i == 3)
+                    {
+                        stations[currentStationID].Add("FIFOFLAG",enumerator.Current);
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        i++;
+                        continue;
+                    }
+
+                    if (enumerator.Current.Contains('T'))
+                    {
+                        if (taskTypes.ContainsKey(enumerator.Current))
+                            taskTypesInStations.Remove(enumerator.Current);
+                        rowCount += enumerator.Current.Length + 1;
+                        prevData = enumerator.Current;
+                        continue;
+                    }
+                }
+                
+                string notExistTaskTypes = "";
+                string notExistButPartOfAJobTaskTypes = "";
+                taskTypesInStations.ForEach(i =>
+                {
+                    if (!jobTypes.Any(jobType => 
+                            jobType.Value.Any(options=> 
+                                options.Any(taskType=>taskType.Key == i))))
+                    {
+                        notExistTaskTypes += $"{i}, ";
+                    }
+                    else
+                    {
+                        notExistButPartOfAJobTaskTypes += $"{i}, ";
+                    }
+                });
+                LogWarning($"{notExistTaskTypes} are not executed in any STATIONs even though they are listed as possible task types. This shall raise a warning."
+                    ,rowCount = 0,columnCount);
+                LogWarning($"There are no STATIONs which execute {notExistButPartOfAJobTaskTypes}, however, both {notExistButPartOfAJobTaskTypes} are a part of some job type."
+                    ,rowCount = 0,columnCount);
                 
             }
             else
@@ -385,6 +481,8 @@ public class Program
             }
         }
         
+        // HERE TO CHECK JOBTYPES LATER ON 
+        /*
         Console.WriteLine();
         foreach (var pair in jobTypes)
         {
@@ -398,7 +496,38 @@ public class Program
                 Console.WriteLine("]");
             }
         }
+        */
         
+    }
+
+
+    private static string HandleParenthesis(string line,string title)
+    {
+        line = line[0] == '(' ? line.Remove(0, 1) : line;
+        line = line[line.Length-1] == ')' ?  line.Remove(line.Length-1, 1) : line;
+                
+                
+        // Parsing each data into a list
+        List<string> parsedLine = line.Split($"{title} ").ToList();
+        parsedLine.RemoveAt(0); // removes the first index -> which is ["TITLE "] such as JOBTYPES or STATIONS
+        Console.WriteLine(parsedLine[0]);
+
+        // Remove the ...) (... occurance except the first '(' and the last ')' 
+        parsedLine = parsedLine[0].Split(") (").ToList();
+        // remove the '('
+        parsedLine[0] = parsedLine[0].Remove(0, 1);
+        parsedLine[parsedLine.Count-1]= parsedLine[parsedLine.Count-1].Remove(parsedLine[parsedLine.Count-1].Length-1, 1);
+                
+        // Merge the seperated data into a string line
+        IEnumerator<string> enumerator = parsedLine.GetEnumerator();
+        line = "";
+        while (enumerator.MoveNext())
+        {
+            line += enumerator.Current+" ";
+            
+        }
+
+        return line;
     }
 
     private static void LogWarning(string message,int rowNum = 0 , int colNum = 0)
@@ -406,6 +535,8 @@ public class Program
         Console.ForegroundColor = ConsoleColor.Yellow;
         if(rowNum == 0 && colNum == 0)
             Console.Write("Warning -> ");
+        else if (rowNum == 0 && colNum != 0)
+            Console.Write($"\nWarning in line {colNum} -> ");
         else
             Console.Write($"\nWarning in line {colNum} and {rowNum}th position -> ");
         Console.ForegroundColor = ConsoleColor.DarkYellow;
