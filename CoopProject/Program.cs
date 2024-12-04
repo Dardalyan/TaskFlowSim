@@ -3,16 +3,40 @@
 using System.Collections;
 using System.Globalization;
 using CoopProject;
+using Task = CoopProject.Task;
 
 public class Program
 {
     public static List<Station> Stations = new List<Station>();
     public static void Main(String[] args)
     {
-        PrintWorkFlow(ParseAndLogFlow().Item1, ParseAndLogFlow().Item2, ParseAndLogFlow().Item3);
+        (Dictionary<string, double>, Dictionary<string, List<List<KeyValuePair<string, double>>>>, 
+            Dictionary<string, Dictionary<string, string>>) parsedFlow = (null, null, null);
+
+        while (true)
+        {
+            try
+            {
+                Console.WriteLine("Please enter your workflow file name with its extension...");
+                var input = Console.ReadLine();
+                parsedFlow  = ParseAndLogFlow(input);
+                break;
+            }
+            catch
+            {
+                Console.WriteLine("There is no such file or directory ! Please try again ...");
+                continue;
+            }
+        }
+        
+        var taskTypes = parsedFlow.Item1;
+        var jobTypes = parsedFlow.Item2;
+        var stations = parsedFlow.Item3;
+        
+        PrintWorkFlow(taskTypes,jobTypes,stations);
     }
     
-    private static string DirectoryOfWorkflow()
+    private static string DirectoryOfWorkflow(string workFlowFileName)
     {
         const char slash = '/';
         List<string>dirs = Environment.CurrentDirectory.Split('/').ToList();
@@ -24,13 +48,13 @@ public class Program
         }
         dirs.ForEach(i=> directory+=$"{i}"+slash);
         directory.Remove(directory.Length - 1);
-        directory += "WorkFlow.txt";
+        directory += workFlowFileName;
         
         return directory;
 
     }
 
-    private static Dictionary<int,string> ReadLinesOfWorkFlow()
+    private static Dictionary<int,string> ReadLinesOfWorkFlow(string workFlowFileName)
     {
         string line;
         Dictionary<int, string> lineByLine = new Dictionary<int, string>();
@@ -39,7 +63,7 @@ public class Program
             StreamReader sr;
             try
             {
-                sr = new StreamReader(DirectoryOfWorkflow());
+                sr = new StreamReader(DirectoryOfWorkflow(workFlowFileName));
             }
             catch (Exception e)
             {
@@ -77,9 +101,9 @@ public class Program
     private static (Dictionary<string, double>,
         Dictionary<string,List<List<KeyValuePair<string,double>>>> ,
         Dictionary<string,Dictionary<string,string>>) 
-        ParseAndLogFlow()
+        ParseAndLogFlow(string workFlowfileName)
     {
-        Dictionary<int, string> lineByLine = ReadLinesOfWorkFlow();
+        Dictionary<int, string> lineByLine = ReadLinesOfWorkFlow(workFlowfileName);
 
         Dictionary<string, double> taskTypes = new Dictionary<string, double>();
         Dictionary<string,List<List<KeyValuePair<string,double>>>> jobTypes = new Dictionary<string,List<List<KeyValuePair<string,double>>>>();
@@ -521,8 +545,8 @@ public class Program
                     string plusMinusUnicode = "\u00B1";
 
                     Random generator = new Random();
-                    string sizeOfstations = Convert.ToString(stations.Count);
-                    string newStationID = "S"+sizeOfstations+1;
+                    int sizeOfstations = stations.Count;
+                    string newStationID = $"S{sizeOfstations+1}";
                     
                     stations.Add(newStationID,new Dictionary<string, string>());
                     stations[newStationID].Add("max_capacity",generator.Next(1,4).ToString());

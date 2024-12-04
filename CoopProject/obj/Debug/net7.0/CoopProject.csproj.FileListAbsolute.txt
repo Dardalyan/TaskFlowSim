@@ -12,3 +12,17 @@
 /Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/obj/Debug/net7.0/CoopProject.pdb
 /Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/obj/Debug/net7.0/CoopProject.genruntimeconfig.cache
 /Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/obj/Debug/net7.0/ref/CoopProject.dll
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/CoopProject.pdb
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/bin/Debug/net7.0/CoopProject
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/bin/Debug/net7.0/CoopProject.deps.json
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/bin/Debug/net7.0/CoopProject.runtimeconfig.json
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/bin/Debug/net7.0/CoopProject.dll
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/bin/Debug/net7.0/CoopProject.pdb
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/CoopProject.GeneratedMSBuildEditorConfig.editorconfig
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/CoopProject.AssemblyInfoInputs.cache
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/CoopProject.AssemblyInfo.cs
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/CoopProject.csproj.CoreCompileInputs.cache
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/CoopProject.dll
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/refint/CoopProject.dll
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/CoopProject.genruntimeconfig.cache
+/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/Debug/net7.0/ref/CoopProject.dll

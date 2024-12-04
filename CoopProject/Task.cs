@@ -3,12 +3,12 @@ namespace CoopProject;
 public class Task
 {
     private TaskType TaskType;
-    private string TaskID;
+    private string TypeID;
 
     public Task(string taskId,TaskType taskType)
     {
         TaskType = taskType;
-        TaskID = taskId;
+        TypeID = taskId;
     }
 
     public TaskType GetTaskType()
@@ -16,8 +16,8 @@ public class Task
         return TaskType;
     }
 
-    public string GetTaskID()
+    public string GetTaskTypeID()
     {
-        return TaskID;
+        return TypeID;
     }
 }
