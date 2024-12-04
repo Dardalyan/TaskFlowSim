@@ -1,15 +1,11 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using System.Collections;
-using System.Globalization;
+﻿using System.Globalization;
 using CoopProject;
-using Task = CoopProject.Task;
 
 public class Program
 {
-    public static List<Station> Stations = new List<Station>();
     public static void Main(String[] args)
     {
+        
         (Dictionary<string, double>, Dictionary<string, List<List<KeyValuePair<string, double>>>>, 
             Dictionary<string, Dictionary<string, string>>) parsedFlow = (null, null, null);
 
@@ -17,6 +13,7 @@ public class Program
         {
             try
             {
+                // Take user input to find correct file name 
                 Console.WriteLine("Please enter your workflow file name with its extension...");
                 var input = Console.ReadLine();
                 parsedFlow  = ParseAndLogFlow(input);
@@ -29,6 +26,11 @@ public class Program
             }
         }
         
+        // TODO: 1) We need to extract data from job file as we do above,
+        // TODO: 2) then  we need to parse and hold that data in a variable to process it later as below
+        
+        
+        // Each data which is adjusted in the workflow file now extracted 
         var taskTypes = parsedFlow.Item1;
         var jobTypes = parsedFlow.Item2;
         var stations = parsedFlow.Item3;
@@ -36,7 +38,7 @@ public class Program
         PrintWorkFlow(taskTypes,jobTypes,stations);
     }
     
-    private static string DirectoryOfWorkflow(string workFlowFileName)
+    private static string DirectoryOfFiles(string fileName)
     {
         const char slash = '/';
         List<string>dirs = Environment.CurrentDirectory.Split('/').ToList();
@@ -48,13 +50,13 @@ public class Program
         }
         dirs.ForEach(i=> directory+=$"{i}"+slash);
         directory.Remove(directory.Length - 1);
-        directory += workFlowFileName;
+        directory += fileName;
         
         return directory;
 
     }
 
-    private static Dictionary<int,string> ReadLinesOfWorkFlow(string workFlowFileName)
+    private static Dictionary<int,string> ReadLinesInFiles(string fileName,bool isWorkFlow = false, bool isjobFile = false)
     {
         string line;
         Dictionary<int, string> lineByLine = new Dictionary<int, string>();
@@ -63,29 +65,38 @@ public class Program
             StreamReader sr;
             try
             {
-                sr = new StreamReader(DirectoryOfWorkflow(workFlowFileName));
+                sr = new StreamReader(DirectoryOfFiles(fileName));
             }
             catch (Exception e)
             {
-                throw new Exception("Workflow.txt file cannot open");
+                throw new Exception($"{fileName} file cannot open");
             }
 
             line = sr.ReadLine()!;
 
-            int lineNumber = 1;
-            while (line != null!)
+            if (isWorkFlow)
             {
-                if (line[0] == '(' && line.Contains("TASKTYPES"))
-                    lineByLine.Add(lineNumber, line);
+                int lineNumber = 1;
+                while (line != null!)
+                {
+                    if (line[0] == '(' && line.Contains("TASKTYPES"))
+                        lineByLine.Add(lineNumber, line);
 
-                if (line[0] == '(' && line.Contains("JOBTYPES"))
-                    lineByLine.Add(lineNumber, line);
+                    if (line[0] == '(' && line.Contains("JOBTYPES"))
+                        lineByLine.Add(lineNumber, line);
 
-                if (line[0] == '(' && line.Contains("STATIONS"))
-                    lineByLine.Add(lineNumber, line);
+                    if (line[0] == '(' && line.Contains("STATIONS"))
+                        lineByLine.Add(lineNumber, line);
 
-                line = sr.ReadLine()!;
-                lineNumber++;
+                    line = sr.ReadLine()!;
+                    lineNumber++;
+                }
+            }
+
+            if (isjobFile)
+            {
+                // TODO: We are going to do same thing as we did above, each key ex: key = 0, represents the index or line number
+                // TODO: And Values of that keys represents the each line as string, then we'll use this data in ParseAndLogJobs() method !
             }
 
         }
@@ -98,12 +109,12 @@ public class Program
         return lineByLine;
     }
 
-    private static (Dictionary<string, double>,
+        private static (Dictionary<string, double>,
         Dictionary<string,List<List<KeyValuePair<string,double>>>> ,
         Dictionary<string,Dictionary<string,string>>) 
         ParseAndLogFlow(string workFlowfileName)
     {
-        Dictionary<int, string> lineByLine = ReadLinesOfWorkFlow(workFlowfileName);
+        Dictionary<int, string> lineByLine = ReadLinesInFiles(workFlowfileName,isWorkFlow:true);
 
         Dictionary<string, double> taskTypes = new Dictionary<string, double>();
         Dictionary<string,List<List<KeyValuePair<string,double>>>> jobTypes = new Dictionary<string,List<List<KeyValuePair<string,double>>>>();
@@ -681,6 +692,19 @@ public class Program
         Console.WriteLine(message);
         Console.ResetColor();
 
+    }
+
+    private static Dictionary<string, Dictionary<string, string>> ParseAndLogJobs(string jobFileName)
+    {
+        // TODO:As we did in the ParseAndLogFlow method, we need to parse and return the dictionary 
+        // TODO: jobs will hold === Just an Example => {'Job1' : { {"jobType":"J1"}, {"startTime":1}, {"duration":"30"}  } }
+        
+        Dictionary<int, string> lineByLine = ReadLinesInFiles(jobFileName,isjobFile:true);
+        Dictionary<string,Dictionary<string,string>> jobs = new Dictionary<string,Dictionary<string,string>>();
+
+        
+        
+        return jobs; 
     }
     
     

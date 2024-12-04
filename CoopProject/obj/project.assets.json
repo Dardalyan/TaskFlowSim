@@ -8,19 +8,20 @@
     "net7.0": []
   },
   "packageFolders": {
-    "/Users/ardasenyuz/.nuget/packages/": {}
+    "/Users/dardalyan/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/CoopProject.csproj",
+      "projectUniqueName": "/Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/CoopProject.csproj",
       "projectName": "CoopProject",
-      "projectPath": "/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/CoopProject.csproj",
-      "packagesPath": "/Users/ardasenyuz/.nuget/packages/",
-      "outputPath": "/Users/ardasenyuz/Desktop/SE307/coopProject/CoopProject/obj/",
+      "projectPath": "/Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/CoopProject.csproj",
+      "packagesPath": "/Users/dardalyan/.nuget/packages/",
+      "outputPath": "/Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/obj/",
       "projectStyle": "PackageReference",
+      "UsingMicrosoftNETSdk": false,
       "configFilePaths": [
-        "/Users/ardasenyuz/.nuget/NuGet/NuGet.Config"
+        "/Users/dardalyan/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net7.0"
@@ -59,7 +60,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.410/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/7.0.400/RuntimeIdentifierGraph.json"
       }
     }
   }
