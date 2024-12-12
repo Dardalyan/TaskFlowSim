@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using CoopProject;
 
 public class Program
@@ -646,36 +647,24 @@ public class Program
 
     private static string HandleParenthesis(string line,string title)
     {
-        if (title.Contains("TASKTYPE"))
-        {
-            line = line[0] == '(' ? line.Remove(0, 1) : line;
-            line = line[line.Length-1] == ')' ?  line.Remove(line.Length-1, 1) : line;
-            return line;
-        }
+        // Replace with white space, in every occurance of '(' or ')'.
+        line = line.Replace("(", " ").Replace(")", " ");
+        // Remove empty spaces from the beginning and the end.
+        line = line.TrimStart();
+        line = line.TrimEnd();
         
+        // ıf there is a more than one white spaces, then reduce it to just one.
+        line = Regex.Replace(line, @"\s{2,}", " ");
         
-        line = line[0] == '(' ? line.Remove(0, 1) : line;
-        line = line[line.Length-1] == ')' ?  line.Remove(line.Length-1, 1) : line;
-                
-                
+        // IF 
+        // We are working on tasktypes 
+        if (title.Contains("TASKTYPE")) return line;
+        
+        // ELSE 
         // Parsing each data into a list
         List<string> parsedLine = line.Split($"{title} ").ToList();
         parsedLine.RemoveAt(0); // removes the first index -> which is ["TITLE "] such as JOBTYPES or STATIONS
-        //Console.WriteLine(parsedLine[0]);
-
-        // Remove the ...) (... occurance except the first '(' and the last ')' 
-        parsedLine = parsedLine[0].Split(") (").ToList();
-        // remove the '('
-        parsedLine[0] = parsedLine[0].Remove(0, 1);
-        parsedLine[parsedLine.Count-1]= parsedLine[parsedLine.Count-1].Remove(parsedLine[parsedLine.Count-1].Length-1, 1);
-                
-        // Merge the seperated data into a string line
-        IEnumerator<string> enumerator = parsedLine.GetEnumerator();
-        line = "";
-        while (enumerator.MoveNext())
-        {
-            line += enumerator.Current+" ";
-        }
+        
         return line;
     }
 
