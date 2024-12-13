@@ -2,15 +2,15 @@ namespace CoopProject;
 
 public class TaskType
 {
-    private double Size;
+    private string ID;
 
-    public TaskType(double size)
+    public TaskType(string id)
     {
-        Size = size;
+        ID = id;
     }
     
-    public double GetSize()
+    public string GetTaskTypeID()
     {
-        return Size;
+        return ID;
     }
 }

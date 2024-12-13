@@ -1,15 +1,22 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using CoopProject;
+using Task = CoopProject.Task;
 
 public class Program
 {
+    public static List<Task>Tasks = new List<Task>();
+    public static List<Job>Jobs = new List<Job>();
+    public static List<Station>Stations = new List<Station>();
+    
     public static void Main(String[] args)
     {
-        
         (Dictionary<string, double>, Dictionary<string, List<List<KeyValuePair<string, double>>>>, 
-            Dictionary<string, Dictionary<string, string>>) parsedFlow = (null, null, null);
+            Dictionary<string, Dictionary<string, string>>) parsedFlow = (null!, null!, null!);
 
+        Dictionary<string, Dictionary<string, string>> parsedJob = null!;
+
+        // Workflow file 
         while (true)
         {
             try
@@ -17,7 +24,7 @@ public class Program
                 // Take user input to find correct file name 
                 Console.WriteLine("Please enter your workflow file name with its extension...");
                 var input = Console.ReadLine();
-                parsedFlow  = ParseAndLogFlow(input);
+                parsedFlow  = ParseAndLogFlow(input!);
                 break;
             }
             catch
@@ -27,9 +34,24 @@ public class Program
             }
         }
         
-        // TODO: 1) We need to extract data from job file as we do above,
-        // TODO: 2) then  we need to parse and hold that data in a variable to process it later as below
-        
+        // Job file
+        while (true)
+        {
+            try
+            {
+                // Take user input to find correct file name 
+                Console.WriteLine("Please enter your job file name with its extension...");
+                var input = Console.ReadLine();
+                parsedJob  = ParseAndLogJobs(input!);
+                break;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("There is no such file or directory ! Please try again ...");
+                continue;
+            }
+        }
         
         // Each data which is adjusted in the workflow file now extracted 
         var taskTypes = parsedFlow.Item1;
@@ -37,6 +59,43 @@ public class Program
         var stations = parsedFlow.Item3;
         
         PrintWorkFlow(taskTypes,jobTypes,stations);
+        
+        // Each data in the job file now extracted 
+        var jobs = parsedJob;
+        
+        PrintJobs(jobs);
+
+        int index = 1;
+        while (true)
+        {
+            switch (index)
+            {
+                case 1:
+                    foreach (var task in taskTypes)
+                    {
+                        Tasks.Add(new Task(task.Value,new TaskType(task.Key)));
+                    }
+                    index++;
+                    break;
+                case 2:
+                    foreach (var job in jobs)
+                    {
+                    }
+                    index++;
+                    break;
+                case 3:
+                    index++;
+                    break;
+                case 4:
+                    index++;
+                    break;
+            }
+            break;
+        }
+        
+        
+
+        
     }
     
     private static string DirectoryOfFiles(string fileName)
@@ -98,6 +157,13 @@ public class Program
             {
                 // TODO: We are going to do same thing as we did above, each key ex: key = 0, represents the index or line number
                 // TODO: And Values of that keys represents the each line as string, then we'll use this data in ParseAndLogJobs() method !
+                int lineNumber = 1;
+                while (line != null!)
+                { 
+                    lineByLine.Add(lineNumber, line);
+                    line = sr.ReadLine()!;
+                    lineNumber++;
+                }
             }
 
         }
@@ -131,7 +197,7 @@ public class Program
             {
                 
                 // Parsing each data into a list
-                List<string> parsedLine = HandleParenthesis(pairs.Value,"TASKTYPES").Split(" ").ToList();
+                List<string> parsedLine = HandleParenthesisAndWhiteSpaces(pairs.Value,"TASKTYPES").Split(" ").ToList();
                 
                 // Temporary list to control number of occurance of the data in the original list. NOTE: in order to log just once !
                 List<string> tempParsedLine = new List<string>();
@@ -237,7 +303,7 @@ public class Program
             else if (pairs.Value.Contains("JOBTYPES"))
             {
                 // removing paranthesis
-                string line = HandleParenthesis(pairs.Value,"JOBTYPES");
+                string line = HandleParenthesisAndWhiteSpaces(pairs.Value,"JOBTYPES");
                 
                 // Now like we did in the tasktypes we can move on 
                 List<string> parsedLine = line.Split(" ").ToList();
@@ -411,7 +477,7 @@ public class Program
             }
             else if (pairs.Value.Contains("STATIONS"))
             {
-                string line = HandleParenthesis(pairs.Value, "STATIONS");
+                string line = HandleParenthesisAndWhiteSpaces(pairs.Value, "STATIONS");
                 //Console.WriteLine(line);
                 
                 // Now like we did in the jobtypes we can move on 
@@ -606,7 +672,7 @@ public class Program
     
     {
         //PRINTING OUT TASKTYPES
-        Console.WriteLine("Workflow file content...");
+        Console.WriteLine("\nWorkflow file content...");
         Console.Write("\nTASKTYPES:");
         foreach (var taskType in taskTypes)
         {
@@ -645,7 +711,7 @@ public class Program
         }
     }
 
-    private static string HandleParenthesis(string line,string title)
+    private static string HandleParenthesisAndWhiteSpaces(string line,string title)
     {
         // Replace with white space, in every occurance of '(' or ')'.
         line = line.Replace("(", " ").Replace(")", " ");
@@ -682,19 +748,135 @@ public class Program
         Console.ResetColor();
 
     }
-
+    
     private static Dictionary<string, Dictionary<string, string>> ParseAndLogJobs(string jobFileName)
     {
-        // TODO:As we did in the ParseAndLogFlow method, we need to parse and return the dictionary 
-        // TODO: jobs will hold === Just an Example => {'Job1' : { {"jobType":"J1"}, {"startTime":1}, {"duration":"30"}  } }
+        // jobs hold => {'Job1' : { {"jobType":"J1"}, {"startTime":1}, {"duration":"30"}  } }
         
         Dictionary<int, string> lineByLine = ReadLinesInFiles(jobFileName,isjobFile:true);
+        
         Dictionary<string,Dictionary<string,string>> jobs = new Dictionary<string,Dictionary<string,string>>();
 
-        
+        foreach (var line in lineByLine)
+        {
+            lineByLine[line.Key] = line.Value.TrimStart();
+            lineByLine[line.Key] = line.Value.TrimEnd();
+            lineByLine[line.Key] = Regex.Replace(line.Value, @"\s{2,}", " ");
+        }
+
+        int lineNum = 0;
+        foreach (var line in lineByLine)
+        {
+            lineNum++;
+            
+            string jobInfo = line.Value;
+            List<string>parsedInfo = jobInfo.Split(" ").ToList();
+
+            string jobID = null!; // current jobID
+            string prevData = null;
+            
+            IEnumerator<string> enumerator = parsedInfo.GetEnumerator();
+
+            while (enumerator.MoveNext())
+            {
+
+                if (jobID == null && enumerator.Current.ToLower()[0] != 'j')
+                {
+                    LogWarning($"Invalid JobID {enumerator.Current}",colNum:lineNum);
+                    
+                    // Correct the invalid jobID 
+                    var charList = enumerator.Current.ToLower().ToCharArray();
+                        
+                    // Adjusting the invalid jobID
+                    string adjustedID = "Job";
+                    foreach (var c in charList)
+                    {
+                        if (c != 'j' && c != 'o' && c != 'b')
+                            adjustedID += c;
+                    }
+                    jobID = adjustedID;
+                    jobs.Add(adjustedID,new Dictionary<string, string>());
+                    prevData = adjustedID;
+                    continue;
+                }
+                
+                if (enumerator.Current.ToLower().Contains("job"))
+                {
+                    jobID = enumerator.Current;
+                    try
+                    {
+                        // if JobID is listed more than one, then log and continue with other jobs
+                        jobs.Add(enumerator.Current, new Dictionary<string, string>());
+                    }
+                    catch
+                    {
+                        LogWarning($"JobID:{jobID} is listed more than one !",colNum:lineNum);
+                        break;
+                    }
+                    prevData = enumerator.Current;
+                    continue;
+                }
+                
+                if (!enumerator.Current.ToLower().Contains("job") && enumerator.Current.ToLower().Contains("j"))
+                {
+                    if (enumerator.Current.ToLower()[0] != 'j')
+                    {
+                        LogWarning($"Invalid JobTypeID for {enumerator.Current}",colNum:lineNum);
+                        var charList = enumerator.Current.ToLower().ToCharArray();
+                        
+                        string adjustedID = "J";
+                        foreach (var c in charList)
+                        {
+                            if (c != 'j')
+                                adjustedID += c;
+                        }
+                        jobs[jobID].Add("JobType",adjustedID);
+                        prevData = adjustedID;
+                        continue;
+                    }
+                    
+                    jobs[jobID].Add("JobType",enumerator.Current);
+                    prevData = enumerator.Current;
+                    continue;
+                }
+                
+                
+                if (prevData!.ToLower().Contains('j') && !enumerator.Current.ToLower().Contains("j"))
+                {
+                    if (Convert.ToInt32(enumerator.Current) < 0)
+                        LogWarning($"Invalid start time {enumerator.Current}",colNum:lineNum);
+                    
+                    jobs[jobID].Add("StartTime", Math.Abs(Convert.ToInt32(enumerator.Current)).ToString());
+                    prevData = enumerator.Current;
+                    continue;
+                }
+                
+                if (!prevData.ToLower().Contains('j') && !enumerator.Current.ToLower().Contains("j"))
+                {
+                    if (Convert.ToInt32(enumerator.Current) < 0)
+                        LogWarning($"Invalid duration {enumerator.Current}",colNum:lineNum);
+                    
+                    jobs[jobID].Add("Duration", Math.Abs(Convert.ToInt32(enumerator.Current)).ToString());
+                    prevData = enumerator.Current;
+                    continue;
+                }
+            }
+        }
         
         return jobs; 
     }
-    
+
+
+    private static void PrintJobs(Dictionary<string, Dictionary<string, string>> jobs)
+    {
+        Console.WriteLine("\nJob file content...\n");
+        foreach (var job in jobs)
+        {
+            Console.WriteLine($"JobID: {job.Key} " +
+                              $"JobType:{jobs[job.Key]["JobType"]} " +
+                              $"StartTime: {jobs[job.Key]["StartTime"]} " +
+                              $"Duration: {jobs[job.Key]["Duration"]}");
+        }
+    }
     
 }
