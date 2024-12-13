@@ -1,9 +1,14 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using CoopProject;
+using Task = CoopProject.Task;
 
 public class Program
 {
+    public static List<Task>Tasks = new List<Task>();
+    public static List<Job>Jobs = new List<Job>();
+    public static List<Station>Stations = new List<Station>();
+    
     public static void Main(String[] args)
     {
         (Dictionary<string, double>, Dictionary<string, List<List<KeyValuePair<string, double>>>>, 
@@ -55,12 +60,38 @@ public class Program
         
         PrintWorkFlow(taskTypes,jobTypes,stations);
         
-        
-        
         // Each data in the job file now extracted 
         var jobs = parsedJob;
         
-        PrintJobs(jobs); 
+        PrintJobs(jobs);
+
+        int index = 1;
+        while (true)
+        {
+            switch (index)
+            {
+                case 1:
+                    foreach (var task in taskTypes)
+                    {
+                        Tasks.Add(new Task(task.Value,new TaskType(task.Key)));
+                    }
+                    index++;
+                    break;
+                case 2:
+                    foreach (var job in jobs)
+                    {
+                    }
+                    index++;
+                    break;
+                case 3:
+                    index++;
+                    break;
+                case 4:
+                    index++;
+                    break;
+            }
+            break;
+        }
         
         
 
