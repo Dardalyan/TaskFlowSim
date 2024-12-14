@@ -5,7 +5,6 @@ using Task = CoopProject.Task;
 
 public class Program
 {
-    public static List<Task>Tasks = new List<Task>();
     public static List<Job>Jobs = new List<Job>();
     public static List<Station>Stations = new List<Station>();
     
@@ -23,8 +22,9 @@ public class Program
         {
             // Take user input to find correct file name 
             Console.WriteLine("Please enter your workflow file name with its extension...");
-            var input = Console.ReadLine();
-            parsedFlow  = ParseAndLogFlow(input!);
+            //var input = Console.ReadLine();
+            //parsedFlow  = ParseAndLogFlow(input!);
+            parsedFlow = ParseAndLogFlow("workflow.txt");
             break;
         }
         catch
@@ -41,8 +41,9 @@ public class Program
         {
             // Take user input to find correct file name 
             Console.WriteLine("Please enter your job file name with its extension...");
-            var input = Console.ReadLine();
-            parsedJob  = ParseAndLogJobs(input!);
+            //var input = Console.ReadLine();
+            //parsedJob  = ParseAndLogJobs(input!);
+            parsedJob  = ParseAndLogJobs("jobfile.txt");
             break;
         }
         catch(Exception e)
@@ -64,7 +65,42 @@ public class Program
     var jobs = parsedJob;
     
     PrintJobs(jobs);
+
+    // Creating job instances
+    foreach (var job in jobs)
+    {
+        JobType jt = new JobType(jobTypes.Keys.ToList().FirstOrDefault(x=> x == job.Value["JobType"])!);
+        int optCount = 0;
+        foreach (var options in jobTypes[jt.GetJobTypeID()])
+        {
+            jt.TaskSequence.Add(optCount,new List<Task>());
+            options.ForEach(task =>
+            {
+                jt.TaskSequence[optCount].Add(new Task(task.Value,new TaskType(task.Key)));
+            });
+            optCount++;
+        }
+        Job j = new Job(job.Key, Convert.ToInt32(job.Value["StartTime"]),
+            Convert.ToInt32(job.Value["Duration"]), jt);
+        
+        Jobs.Add(j);
+    }
+
     
+    // Creating station instances 
+    foreach (var station in stations)
+    {
+        Station s = new Station(station.Key,Convert.ToInt32(station.Value["max_capacity"]),
+            Convert.ToChar(station.Value["MULTIFLAG"]),Convert.ToChar(station.Value["FIFOFLAG"]));
+        foreach (var stationData in station.Value)
+        {
+            if (!stationData.Key.Equals("max_capacity") && !stationData.Key.Equals("MULTIFLAG") && !stationData.Key.Equals("FIFOFLAG"))
+            {
+                s.ExecutableTaskInfo.Add(stationData.Key, new KeyValuePair<string, string>("speed", stationData.Value));
+            }
+        }
+        Stations.Add(s);
+    }
 }
 
     
@@ -277,6 +313,8 @@ public class Program
                 
                 // Now like we did in the tasktypes we can move on 
                 List<string> parsedLine = line.Split(" ").ToList();
+                parsedLine.RemoveAt(0);
+                
                 IEnumerator<string> enumerator = parsedLine.GetEnumerator();
                 
                 // To keep the previous data 
@@ -452,6 +490,8 @@ public class Program
                 
                 // Now like we did in the jobtypes we can move on 
                 List<string> parsedLine = line.Split(" ").ToList();
+                parsedLine.RemoveAt(0);
+                
                 IEnumerator<string> enumerator = parsedLine.GetEnumerator();
                 
                 
@@ -632,7 +672,6 @@ public class Program
                 throw new Exception("\nWrong workflow text file format ! File content cannot be parsed !");
             }
         }
-        
         return (taskTypes,jobTypes,stations);
     }
 
@@ -691,15 +730,6 @@ public class Program
         
         // ıf there is a more than one white spaces, then reduce it to just one.
         line = Regex.Replace(line, @"\s{2,}", " ");
-        
-        // IF 
-        // We are working on tasktypes 
-        if (title.Contains("TASKTYPE")) return line;
-        
-        // ELSE 
-        // Parsing each data into a list
-        List<string> parsedLine = line.Split($"{title} ").ToList();
-        parsedLine.RemoveAt(0); // removes the first index -> which is ["TITLE "] such as JOBTYPES or STATIONS
         
         return line;
     }

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/CoopProject.csproj": {}
+    "/Users/dardalyan/Desktop/SE307/Project/Peren/CoopProject/CoopProject.csproj": {}
   },
   "projects": {
-    "/Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/CoopProject.csproj": {
+    "/Users/dardalyan/Desktop/SE307/Project/Peren/CoopProject/CoopProject.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/CoopProject.csproj",
+        "projectUniqueName": "/Users/dardalyan/Desktop/SE307/Project/Peren/CoopProject/CoopProject.csproj",
         "projectName": "CoopProject",
-        "projectPath": "/Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/CoopProject.csproj",
+        "projectPath": "/Users/dardalyan/Desktop/SE307/Project/Peren/CoopProject/CoopProject.csproj",
         "packagesPath": "/Users/dardalyan/.nuget/packages/",
-        "outputPath": "/Users/dardalyan/Desktop/SE307/Project/CoopProject/CoopProject/obj/",
+        "outputPath": "/Users/dardalyan/Desktop/SE307/Project/Peren/CoopProject/obj/",
         "projectStyle": "PackageReference",
         "UsingMicrosoftNETSdk": false,
         "configFilePaths": [
