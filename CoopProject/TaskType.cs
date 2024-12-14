@@ -2,7 +2,7 @@ namespace CoopProject;
 
 public class TaskType
 {
-    private string ID;
+    private string ID { get; }
 
     public TaskType(string id)
     {

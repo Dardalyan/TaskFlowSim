@@ -5,11 +5,12 @@ namespace CoopProject;
 
 public class Station
 {
-    private string StationID;
-    private double Speed;
-    private int Capacity;
-    private char FIFOFLAG;
-    private char MULTIFLAG;
+    private string StationID { get; }
+    private double Speed { get; }
+    private int Capacity { get; }
+    private char FIFOFLAG { get; }
+    private char MULTIFLAG { get; }
+    public Dictionary<string,string> ExecutableTaskInfo { get; set; }
 
     public Station(string stationId,double speed, int capacity, char multiflag , char fifoflag )
     {
@@ -18,6 +19,7 @@ public class Station
         StationID = stationId;
         FIFOFLAG = fifoflag == 'Y' ? 'Y' : 'N';
         MULTIFLAG = multiflag == 'Y' ? 'Y' : 'N';
+        ExecutableTaskInfo = new Dictionary<string, string>();
     }
     
 
@@ -35,4 +37,7 @@ public class Station
     {
         return Speed;
     }
+    
+    public char GetFifoflag(){return FIFOFLAG;}
+    public char GetMultiflag(){return MULTIFLAG;}
 }

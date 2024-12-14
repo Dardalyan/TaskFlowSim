@@ -2,8 +2,8 @@ namespace CoopProject;
 
 public class Task
 {
-    private TaskType TaskType;
-    private double Size;
+    private TaskType TaskType { get; }
+    private double Size { get; }
 
     public Task(double size,TaskType taskType)
     {

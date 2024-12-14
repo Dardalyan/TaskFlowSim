@@ -2,24 +2,17 @@ namespace CoopProject;
 
 public class JobType
 {
-    private string JobTypeID;
-    private double Duration;
-    public Queue<Task> Tasks;
+    private string JobTypeID { get; }
+    public Dictionary<int,List<Task>> TaskSequence { get; set; }
 
-    public JobType(string jobTypeId, int duration = 2)
+    public JobType(string jobTypeId)
     {
         JobTypeID = jobTypeId;
-        Duration = duration;
-        Tasks = new Queue<Task>();
+        TaskSequence = new Dictionary<int, List<Task>>();
     }
     
     public string GetJobTypeID()
     {
         return JobTypeID;
-    }
-
-    public double GetDuration()
-    {
-        return Duration;
     }
 }
