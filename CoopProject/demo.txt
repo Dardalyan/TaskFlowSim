@@ -1,9 +1,0 @@
-        foreach (var pair in stations)
-        {
-            Console.WriteLine($"{pair.Key}:");
-            foreach (var VARIABLE in pair.Value)
-            {
-                Console.WriteLine(VARIABLE.Key + ": " + VARIABLE.Value);
-            }
-        }
-        var a = 5;
