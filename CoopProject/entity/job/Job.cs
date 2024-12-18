@@ -1,19 +1,18 @@
+using CoopProject.entities;
+
 namespace CoopProject;
 
-public class Job
+public class Job : Entity
 {
     private JobType JobType { get; }
     private int Duration { get; }
     private int StartTime { get; }
-    private string JobID { get; }
 
-    public Job(string jobId,int startTime, int duration, JobType jobType)
+    public Job(string jobId,int startTime, int duration, JobType jobType):base(jobId)
     {
-        JobID = jobId;
         JobType = jobType;
         Duration = duration;
         StartTime = startTime;
-        
     }
     
     public int GetDuration(){return Duration;}
@@ -23,11 +22,7 @@ public class Job
     {
         return JobType;
     }
-
-    public string GetJobID()
-    {
-        return JobID;
-    }
+    
 
 
 }
