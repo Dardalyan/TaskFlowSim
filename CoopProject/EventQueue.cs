@@ -10,12 +10,16 @@ public class EventQueue
     private Time Time = new Time();
     private Event Event = new Event();
 
-    public EventQueue()
+    public EventQueue(List<Station> stations,List<Job>jobs)
     {
-        //TODO Stations = GetStations();
-        //TODO StartTimes = GetStartTimes();
-        //TODO Jobs = GetJobs();
-        //TODO Mainde initialize etmemiz lazım
+        Stations = stations;
+        Jobs = jobs;
+        StartTimes = new List<int>();
+        
+        Jobs.ForEach(job =>
+        {
+            StartTimes!.Add(job.GetStartTime());
+        });
 
         while (true)
         {

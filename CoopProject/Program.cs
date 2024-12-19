@@ -110,7 +110,7 @@ public class Program
         if(!s.Equals(null))Stations.Add(s);
     }
     
-    
+    EventQueue eventQueue = new EventQueue(Stations,Jobs);
     
     
     
