@@ -18,14 +18,23 @@ public class SCreator : ICreator<Station>
         
         
         Station s = new Station(station.Key,Convert.ToInt32(station.Value["max_capacity"]),
-            Convert.ToChar(station.Value["MULTIFLAG"]),Convert.ToChar(station.Value["FIFOFLAG"]));
-        foreach (var stationData in station.Value)
-        {
-            if (!stationData.Key.Equals("max_capacity") && !stationData.Key.Equals("MULTIFLAG") && !stationData.Key.Equals("FIFOFLAG"))
+            Convert.ToChar(station.Value["MULTIFLAG"]),Convert.ToChar(station.Value["FIFOFLAG"]),
+            (stationInstance) =>
             {
-                s.ExecutableTaskInfo.Add(stationData.Key, new KeyValuePair<string, string>("speed", stationData.Value));
-            }
-        }
+                foreach (var stationData in station.Value)
+                {
+                    if (!stationData.Key.Equals("max_capacity") &&
+                        !stationData.Key.Equals("MULTIFLAG") &&
+                        !stationData.Key.Equals("FIFOFLAG"))
+                    {
+                        stationInstance.ExecutableTaskInfo.Add(
+                            Program.Tasks.Find(task => task.GetTaskType().GetTaskTypeID() == stationData.Key)!, 
+                            new KeyValuePair<string, string>("speed", stationData.Value)
+                        );
+                    }
+                }
+            });
+       
 
         return s;
     }

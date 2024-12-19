@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using CoopProject.entities;
 
 namespace CoopProject;
@@ -8,38 +9,57 @@ public class Station :Entity
     private int Capacity { get; }
     private char FIFOFLAG { get; }
     private char MULTIFLAG { get; }
-    public Dictionary<string,KeyValuePair<string,string>> ExecutableTaskInfo { get; set; }
+
+
+    private Dictionary<Task, KeyValuePair<string, string>> _executableTaskInfo; // {instance:{"speed":"3"}}
+    public Dictionary<Task,KeyValuePair<string,string>> ExecutableTaskInfo
+    {
+        get { return _executableTaskInfo;} set{ _executableTaskInfo=value;} 
+    }
     
     //!!!!
-    public List<TaskType> AcceptedTaskTypes;
+    public List<TaskType> AcceptedTaskTypes { get; set; }
+    
     //!!!
-    public List<Task> ExecutableTasks;
+    public List<Task> ExecutableTasks { get; set; }
     
     //!!!!!
-    private List<Job> Queue = new List<Job>();
+    private List<Job> Queue { get; set; }
     
     //!!!!
-    private List<Job> JobsBeingProcessed = new List<Job>();
+    private List<Job> JobsBeingProcessed { get; set; }
+
     
     //!!!!
-    private List<double> TaskTypeSpeeds;
+    private List<double> TaskTypeSpeeds{ get; set; }
     
     //!!!!
-    private List<double> TaskTypesPlusMinus;
+    private List<double> TaskTypesPlusMinus { get; set; }
     
     //!!!!
-    private List<int> TasksFinishTime;
+    private List<int> TasksFinishTime { get; set; }
     
     //!!!!
     private int TimeActive = 0;
 
-    public Station(string stationID, int capacity, char multiflag , char fifoflag ):base(stationID)
+    public Station(string stationID, int capacity, char multiflag , char fifoflag, Action<Station>assignExecTinfo):base(stationID)
     {
         Capacity = capacity;
         FIFOFLAG = fifoflag == 'Y' ? 'Y' : 'N';
         MULTIFLAG = multiflag == 'Y' ? 'Y' : 'N';
-        ExecutableTaskInfo = new Dictionary<string, KeyValuePair<string, string>>();
-        //TODO AcceptedTaskTypes, TaskTypeSpeeds, TaskTypesPlusMinus ExecutableTaskInfodan çekilecek.
+        _executableTaskInfo = new Dictionary<Task, KeyValuePair<string, string>>();
+        assignExecTinfo(this);
+        
+        AcceptedTaskTypes = new List<TaskType>();
+        ExecutableTasks = new List<Task>();
+        Queue = new List<Job>();
+        JobsBeingProcessed = new List<Job>();
+        TaskTypeSpeeds = new List<double>();
+        TaskTypesPlusMinus = new List<double>();
+        TasksFinishTime = new List<int>();
+        
+        
+        
     }
 
     public int GetCapacity()

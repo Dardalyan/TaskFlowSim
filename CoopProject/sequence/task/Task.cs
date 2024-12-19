@@ -8,7 +8,7 @@ public class Task
     //!!!!!!
     private bool isFinished = false;
     //!!!!!!
-    private String ID;
+    private String ID; // to identify same tasks with TaskTypeID in queue
     //!!!!
     private static int IDCounter = 0;
 

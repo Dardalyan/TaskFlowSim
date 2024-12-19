@@ -1,9 +1,12 @@
 ﻿using CoopProject;
 using CoopProject.facility;
 using CoopProject.util;
+using Task = CoopProject.Task;
 
 public class Program
 {
+    public static List<Task>Tasks = new List<Task>();
+    
     private static List<Job>Jobs = new List<Job>();
     private static List<Station>Stations = new List<Station>();
     
@@ -88,6 +91,15 @@ public class Program
     foreach (var job in jobs)
     {
         Job j = jobCreator.CreateEntity(job);
+        // For each created job, we collect all possible tasks, then put them into a Global Task list to use it later.
+        foreach (var option in j.GetJobType().TaskSequence)
+        {
+            option.Value.ForEach(task =>
+            {
+                if(!Tasks.Contains(task))
+                    Tasks.Add(task);
+            });
+        }
         if(!j.Equals(null)) Jobs.Add(j);
     }
     
@@ -101,6 +113,7 @@ public class Program
     
     
     
-    }
+    
+}
     
 }
