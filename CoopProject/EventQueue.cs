@@ -20,7 +20,10 @@ public class EventQueue
         {
             StartTimes!.Add(job.GetStartTime());
         });
+    }
 
+    public void Start()
+    {
         while (true)
         {
             Time.Tick();
@@ -61,7 +64,6 @@ public class EventQueue
         }
         //Print station utilization
         UtilizationAndTardiness();
-        
     }
     
     //Check the start times of jobs and activate them if it is their time

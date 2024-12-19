@@ -14,13 +14,14 @@ public class Job : Entity
     private bool isBusy; //is the job currently getting done
     
     //!!!!
-    private int FinishTime;
+    public int DeadLine{private set; get; }
 
     public Job(string jobId,int startTime, int duration, JobType jobType):base(jobId)
     {
         JobType = jobType;
         Duration = duration;
         StartTime = startTime;
+        DeadLine = CalculateDeadline();
     }
     
     public int GetDuration(){return Duration;}
@@ -31,8 +32,13 @@ public class Job : Entity
         return JobType;
     }
 
+    public int GetDeadline()
+    {
+        return DeadLine;
+    }
+
     //!!!!!!!!
-    public int CalculateDeadline()
+    private int CalculateDeadline()
     {
         return StartTime + Duration;
     }
@@ -41,14 +47,17 @@ public class Job : Entity
     //Get the next task to be executed
     public Task GetNextTask() 
     {
-        for(int x=0; x< JobType.TaskSequence.Count(); x++)
+        foreach (var option in JobType.TaskSequence)
         {
-            if (JobType.TaskSequence[x].ElementAt(0).CheckFinished() == false)
+            var sequenceInCurrentOption = option.Value;
+            
+            IEnumerator<Task> enumerator = sequenceInCurrentOption.GetEnumerator();
+            while (enumerator.MoveNext())
             {
-                return JobType.TaskSequence[x].ElementAt(0);
+                if(!enumerator.Current.CheckFinished())
+                    return enumerator.Current;
             }
         }
-        
         //job is finished
         return null;
     }
@@ -86,13 +95,13 @@ public class Job : Entity
     //!!!!
     public void SetFinishTime(int FinishTime)
     {
-        this.FinishTime = FinishTime;
+        this.DeadLine = FinishTime;
     }
     
     //!!!
     public int GetJobTardiness()
     {
-        return FinishTime - CalculateDeadline();
+        return DeadLine - CalculateDeadline();
     }
 
 

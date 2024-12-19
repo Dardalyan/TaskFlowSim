@@ -21,14 +21,14 @@ public class Event
     //Finds and returns which station can execute the task of the given job
     public Station AssignJobs(List<Station> stations, Job job)
     {
-        Task Task = job.GetNextTask();
+        Task task = job.GetNextTask();
         List<Station> availableStations = new List<Station>();
 
         //Iterate through each station to find those capable of executing the task
         foreach (Station station in stations)
         {
             //If the station supports the task type, add it to the list of available stations
-            if (station.AcceptedTaskTypes.Contains(Task.GetTaskType()))
+            if (station.AcceptedTaskTypes.Contains(task.GetTaskType()))
             {
                 availableStations.Add(station);
             }

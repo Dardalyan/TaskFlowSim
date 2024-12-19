@@ -98,13 +98,13 @@ public class Station :Entity
             //fifo = no, so find job with the earliest ddeadline
             if (FIFOFLAG == 'N')
             {
-                int JobDeadLine = Job.CalculateDeadline(); //????
+                int JobDeadLine = Job.GetDeadline(); //????
 
                 for (int i = 0; i < AvailableJobs.Count(); i++)
                 {
                     Job AvailableJob = AvailableJobs.ElementAt(i);
 
-                    int AvailableJobDeadline = AvailableJob.CalculateDeadline();
+                    int AvailableJobDeadline = AvailableJob.GetDeadline();
                     if (AvailableJobDeadline < JobDeadLine) {
                         JobDeadLine = AvailableJobDeadline;
                         Job = AvailableJob;
