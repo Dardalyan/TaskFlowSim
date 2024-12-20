@@ -27,10 +27,30 @@ public class SCreator : ICreator<Station>
                         !stationData.Key.Equals("MULTIFLAG") &&
                         !stationData.Key.Equals("FIFOFLAG"))
                     {
-                        stationInstance.ExecutableTaskInfo.Add(
-                            Program.Tasks.Find(task => task.GetTaskType().GetTaskTypeID() == stationData.Key)!, 
-                            new KeyValuePair<string, string>("speed", stationData.Value)
-                        );
+                        var speed = stationData.Value; // example->  "3 ±0.20"
+                        double speedInt;
+                        if (speed.Contains("\u00B1"))
+                        {
+                            speed = speed.Replace("\u00B1", ""); //-> 3 0.20
+                            speedInt = new Random().Next(0, 2) == 0
+                                ? Convert.ToDouble(speed.Split(" ").ToList()[0]) + Convert.ToDouble(speed.Split(" ").ToList()[1])
+                                : Convert.ToDouble(speed.Split(" ").ToList()[0]) - Convert.ToDouble(speed.Split(" ").ToList()[1]);
+                        }
+                        else
+                        {
+                            speedInt = Convert.ToInt32(speed);
+                        }
+                            
+                        Program.Tasks.FindAll(task => task.GetTaskType().GetTaskTypeID() == stationData.Key).ForEach(
+                            task =>
+                            {
+                                stationInstance.ExecutableTaskInfo.Add(
+                                    task, 
+                                    new KeyValuePair<string, double>("speed", speedInt)
+                                );
+                            }); 
+
+
                     }
                 }
             });
@@ -39,3 +59,5 @@ public class SCreator : ICreator<Station>
         return s;
     }
 }
+
+// Program.Tasks.Find(task => task.GetTaskType().GetTaskTypeID() == stationData.Key)!, 

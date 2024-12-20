@@ -2,20 +2,17 @@ namespace CoopProject;
 
 public class Time
 {
-    private int CurrentTime;
-
-    public Time()
-    {
-        CurrentTime = 0;
-    }
-
-    public int GetCurrentTime()
+    private static int CurrentTime = 0;
+    
+    public static int GetCurrentTime()
     {
         return CurrentTime;
     }
 
     public void Tick()
     {
-        CurrentTime = CurrentTime + 1;
+        CurrentTime++;
+        Console.WriteLine($"Current time: {CurrentTime}");
+
     }
 }

@@ -26,6 +26,8 @@ public class JCreator : ICreator<Job>
         
         JobType jt = new JobType(JobTypeInfo.Keys.ToList().FirstOrDefault(x => x == job.Value["JobType"])!);
         
+        
+        
         int optCount = 0;
         foreach (var options in JobTypeInfo[jt.GetJobTypeID()])
         {

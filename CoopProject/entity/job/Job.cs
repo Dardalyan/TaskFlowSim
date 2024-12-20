@@ -7,26 +7,27 @@ public class Job : Entity
     private JobType JobType { get; }
     private int Duration { get; }
     private int StartTime { get; }
-    
-    //!!!!
-    private bool isActive;
-    //!!!!
-    private bool isBusy; //is the job currently getting done
-    
-    //!!!!
-    public int DeadLine{private set; get; }
 
-    public Job(string jobId,int startTime, int duration, JobType jobType):base(jobId)
+    private int Deadline { get; set; }
+
+    public Job(string jobId, int startTime, int duration, JobType jobType) : base(jobId)
     {
         JobType = jobType;
         Duration = duration;
         StartTime = startTime;
-        DeadLine = CalculateDeadline();
+        Deadline = StartTime + Duration;
     }
-    
-    public int GetDuration(){return Duration;}
-    public int GetStartTime(){return StartTime;}
-    
+
+    public int GetDuration()
+    {
+        return Duration;
+    }
+
+    public int GetStartTime()
+    {
+        return StartTime;
+    }
+
     public JobType GetJobType()
     {
         return JobType;
@@ -34,74 +35,24 @@ public class Job : Entity
 
     public int GetDeadline()
     {
-        return DeadLine;
+        return Deadline;
     }
 
-    //!!!!!!!!
-    private int CalculateDeadline()
+    public bool IsJobFinished()
     {
-        return StartTime + Duration;
+        return JobType.TaskSequence.Count == 0 || JobType.TaskSequence[0].Count == 0;
     }
 
-    //!!!!!!!!
-    //Get the next task to be executed
-    public Task GetNextTask() 
+    public Task GetNextTask()
     {
-        foreach (var option in JobType.TaskSequence)
-        {
-            var sequenceInCurrentOption = option.Value;
-            
-            IEnumerator<Task> enumerator = sequenceInCurrentOption.GetEnumerator();
-            while (enumerator.MoveNext())
-            {
-                if(!enumerator.Current.CheckFinished())
-                    return enumerator.Current;
-            }
-        }
-        //job is finished
-        return null;
-    }
+        if (JobType.TaskSequence[0].Count >= 1)
+            if(JobType.TaskSequence[0][0].CheckFinished()) JobType.TaskSequence[0].RemoveAt(0);
 
-    //!!!!
-    public bool CheckIfActive()
-    {
-        return isActive;
-    }
-    
-    //!!!!!!
-    public void Activate()
-    {
-        isActive = true;
-    }
-    
-    //!!!!!
-    public void Deactivate()
-    {
-        isActive = false;
-    }
+        if (JobType.TaskSequence[0].Count == 0 || JobType.TaskSequence[0] == null!)
+            return null!;
+        else return JobType.TaskSequence[0][0];
 
-    //!!!!!!
-    public bool CheckIfBusy()
-    {
-        return isBusy;
-    }
 
-    //!!!!!!
-    public void SetBusy(bool Busy)
-    {
-        isBusy = Busy;
-    }
-    
-    //!!!!
-    public void SetFinishTime(int FinishTime)
-    {
-        this.DeadLine = FinishTime;
-    }
-    
-    //!!!
-    public int GetJobTardiness()
-    {
-        return DeadLine - CalculateDeadline();
     }
 
 

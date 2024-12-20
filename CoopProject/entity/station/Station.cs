@@ -1,6 +1,4 @@
-using System.Linq.Expressions;
 using CoopProject.entities;
-
 namespace CoopProject;
 
 
@@ -10,56 +8,55 @@ public class Station :Entity
     private char FIFOFLAG { get; }
     private char MULTIFLAG { get; }
 
+    private  List<Task>ExecutableTaskList { get; set; }
+    private  Queue<Task>AcceptedTasks { set; get; }
+    private  Queue<Task> TasksOnWaiting { set; get; }
 
-    private Dictionary<Task, KeyValuePair<string, string>> _executableTaskInfo; // {instance:{"speed":"3"}}
-    public Dictionary<Task,KeyValuePair<string,string>> ExecutableTaskInfo
+    private Dictionary<Task, KeyValuePair<string, double>> _executableTaskInfo; // {instance:{"speed":"3"}}
+    public Dictionary<Task,KeyValuePair<string,double>> ExecutableTaskInfo
     {
         get { return _executableTaskInfo;} set{ _executableTaskInfo=value;} 
     }
     
-    //!!!!
-    public List<TaskType> AcceptedTaskTypes { get; set; }
-    
     //!!!
-    public List<Task> ExecutableTasks { get; set; }
+    public List<Task> ExecutableTasks { set; get; }
+    public List<double> ExecutedTimes { set; get; }
     
-    //!!!!!
-    private List<Job> Queue { get; set; }
-    
-    //!!!!
-    private List<Job> JobsBeingProcessed { get; set; }
-
-    
-    //!!!!
-    private List<double> TaskTypeSpeeds{ get; set; }
-    
-    //!!!!
-    private List<double> TaskTypesPlusMinus { get; set; }
-    
-    //!!!!
-    private List<int> TasksFinishTime { get; set; }
-    
-    //!!!!
-    private int TimeActive = 0;
 
     public Station(string stationID, int capacity, char multiflag , char fifoflag, Action<Station>assignExecTinfo):base(stationID)
     {
         Capacity = capacity;
         FIFOFLAG = fifoflag == 'Y' ? 'Y' : 'N';
         MULTIFLAG = multiflag == 'Y' ? 'Y' : 'N';
-        _executableTaskInfo = new Dictionary<Task, KeyValuePair<string, string>>();
+        _executableTaskInfo = new Dictionary<Task, KeyValuePair<string, double>>();
         assignExecTinfo(this);
+
+        AcceptedTasks = new Queue<Task>();
+        TasksOnWaiting = new Queue<Task>();
         
-        AcceptedTaskTypes = new List<TaskType>();
+        
         ExecutableTasks = new List<Task>();
-        Queue = new List<Job>();
-        JobsBeingProcessed = new List<Job>();
-        TaskTypeSpeeds = new List<double>();
-        TaskTypesPlusMinus = new List<double>();
-        TasksFinishTime = new List<int>();
+        ExecutedTimes = new List<double>();
+        
+        _executableTaskInfo.Keys.ToList().ForEach(task =>
+        {
+            ExecutableTasks.Add(task);
+        });
+
+        foreach (var info in _executableTaskInfo)
+        {
+            double speed = info.Value.Value;
+            ExecutedTimes.Add(speed);
+        }
         
         
         
+    }
+    
+    
+    private bool IsStationFull()
+    {
+        return Capacity == AcceptedTasks.Count;
     }
 
     public int GetCapacity()
@@ -69,151 +66,54 @@ public class Station :Entity
     
     public char GetFifoflag(){return FIFOFLAG;}
     public char GetMultiflag(){return MULTIFLAG;}
-    
-    //!!!!
-    //Add the job to the stations queue
-    public void AddToQueue(Job Job)
-    {
-        Queue.Add(Job);
-    }
-    
-    //!!!!!
-    public void Work(int Time, Event Event)
-    {
-        List<Job> AvailableJobs = GetAvailableTasks();
 
-        //Assign available jobs to JobsBeşngProcessed
-        while (JobsBeingProcessed.Count() < Capacity)
+
+    public void AcceptTask(Task task)
+    {
+        if (!IsStationFull() && ExecutableTasks.Contains(task))
         {
-            //No available jobs
-            if (!AvailableJobs.Any())
-            {
-                break;
-            }
+            AcceptedTasks.Enqueue(task);
+            Console.WriteLine($"{task.GetTaskType().GetTaskTypeID()} accepted by {ID}.");
+        }
+        else if(!IsStationFull() && !ExecutableTasks.Contains(task) && MULTIFLAG == 'Y')
+        {
+            AcceptedTasks.Enqueue(task);
+            Console.WriteLine($"{task.GetTaskType().GetTaskTypeID()} accepted by {ID}.");
             
-            //Decide on jobs based on fifo or earliest deadline
-            Job Job = AvailableJobs.First();
-            int Index = 0;
-            
-            //fifo = no, so find job with the earliest ddeadline
-            if (FIFOFLAG == 'N')
-            {
-                int JobDeadLine = Job.GetDeadline(); //????
-
-                for (int i = 0; i < AvailableJobs.Count(); i++)
-                {
-                    Job AvailableJob = AvailableJobs.ElementAt(i);
-
-                    int AvailableJobDeadline = AvailableJob.GetDeadline();
-                    if (AvailableJobDeadline < JobDeadLine) {
-                        JobDeadLine = AvailableJobDeadline;
-                        Job = AvailableJob;
-                        Index = i;
-                    }
-                }
-            }
-            // Execute task and update job status
-            JobsBeingProcessed.Add(Job);
-            int TaskFinish = (int)ExecuteTask(Job.GetNextTask(), Time);
-            TasksFinishTime.Add(TaskFinish);
-
-            // Remove job from available list and queue
-            AvailableJobs.RemoveAt(Index);
-            Queue.Remove(Job);
-
-            // Add task start and end events to event list
-            String TaskID = Job.GetNextTask().GetID();
-                Event.AddNewEvent(Time, EventTypes.TaskStart, Job.GetID() + " " + Job.GetJobType().GetJobTypeID() + "/" + TaskID + "/" + GetID());
-                Event.AddNewEvent(TaskFinish, EventTypes.TaskEnd, Job.GetID() + " " + Job.GetJobType().GetJobTypeID() + "/" + TaskID + "/" + GetID());
         }
-        
-        if (JobsBeingProcessed.Any()) {
-            TimeActive++;
+        else if (IsStationFull() && ExecutableTasks.Contains(task))
+        {
+            TasksOnWaiting.Enqueue(task);
+            Console.WriteLine($"{task.GetTaskType().GetTaskTypeID()} is waiting in {ID}.");
         }
-
-        // Update job status when tasks finish
-        List<Job> JobsToRemove = new List<Job>();
-        
-        for (int i = 0; i < JobsBeingProcessed.Count; i++) {
-            int TaskFinish = TasksFinishTime.ElementAt(i);
-
-            if (TaskFinish == Time) {
-                Job WorkingJob = JobsBeingProcessed.ElementAt(i);
-                WorkingJob.GetNextTask().FinishTask();
-
-                WorkingJob.SetBusy(false);
-
-                JobsToRemove.Add(WorkingJob);
-            }
-
-        }
-        
-        // Remove finished jobs from workingJobs and queue
-        foreach (Job Job in JobsToRemove) {
-            TasksFinishTime.RemoveAt(JobsBeingProcessed.IndexOf(Job));
-            JobsBeingProcessed.Remove(Job);
-            Queue.Remove(Job);
-
-            // Add job end event if all tasks are finished
-            if (Job.GetNextTask() == null) {
-                Event.AddNewEvent(Time, EventTypes.JobEnd, Job.GetID());
-                Job.SetFinishTime(Time);
-            }
+        else if (IsStationFull() && !ExecutableTasks.Contains(task)  && MULTIFLAG == 'Y')
+        {
+            TasksOnWaiting.Enqueue(task);
+            Console.WriteLine($"{task.GetTaskType().GetTaskTypeID()} is waiting in {ID}.");
         }
     }
-
-    //!!!!
-    //Returns the available tasks in the stations queue
-    private List<Job> GetAvailableTasks()
-    {
-        List<Job> AvailableJobs = new List<Job>();
-
-        //If the station is multiflag or no jobs are currently being processed, all tasks are available
-        if (MULTIFLAG == 'Y' || !JobsBeingProcessed.Any())
-        {
-            foreach (Job Job in Queue)
-            {
-                AvailableJobs.Add(Job);
-            }
-        }
-        else
-        {
-            
-            //If a task is being executed, only the same type tasks as the current task are available
-            String CurrentTaskType = JobsBeingProcessed.First().GetNextTask().GetTaskType().GetTaskTypeID();
-            foreach (Job Job in Queue)
-            {
-                Task Task = Job.GetNextTask();
-                if (Task.GetID().Equals(CurrentTaskType))
-                {
-                    AvailableJobs.Add(Job);
-                }
-            }
-        }
-
-        return AvailableJobs;
-    }
-    //!!!!
+   
     //Execute a task and calculate the finish time
-    private double ExecuteTask(Task Task, int Time)
+    public void Execute(Task task, int time)
     {
-        int Index = ExecutableTasks.IndexOf(Task);
+        int index = ExecutableTasks.IndexOf(task);
+        
+        Console.WriteLine($"in {ID} , {task.GetTaskType().GetTaskTypeID() } is in process...");
+        if (time + (task.GetSize() / ExecutedTimes[index]) >= Time.GetCurrentTime())
+        {
+            AcceptedTasks.Dequeue().FinishTask();
+            Console.WriteLine($"The execution of  {task.GetTaskType().GetTaskTypeID()} is finished.");
 
-        double BaseSpeed = TaskTypeSpeeds.ElementAt(Index);
-        double PlusMinus = TaskTypesPlusMinus.ElementAt(Index);
+            if (TasksOnWaiting.Count != 0)
+            {
+                Task t = TasksOnWaiting.Dequeue();
+                AcceptedTasks.Enqueue(t);
+                Console.WriteLine($"{t.GetTaskType().GetTaskTypeID()} is now being processed.");
+            }
+        }
+        Console.WriteLine("------------------------------------------------------------------------------");
 
-        double MinSpeed = BaseSpeed - (BaseSpeed * PlusMinus / 100);
-        double MaxSpeed = BaseSpeed + (BaseSpeed * PlusMinus / 100);
-
-        Random random = new Random();
-        double Speed = MinSpeed + random.Next(0, 2) * (MaxSpeed - MinSpeed);
-        double Duration = Task.GetSize() / Speed;
-
-        return Duration + Time;
+        
     }
-
-    public int GetActiveTime()
-    {
-        return TimeActive;
-    }
+    
 }
