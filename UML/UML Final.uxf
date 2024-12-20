@@ -1,0 +1,185 @@
+<diagram program="umletino" version="15.1"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>1071</x><y>140</y><w>250</w><h>140</h></coordinates><panel_attributes>EventQueue
+--
+- Stations: List&lt;Station&gt;
+- StartTimes: List&lt;int&gt;
+- Jobs: List&lt;Job&gt;
+- JobsInProcess: List&lt;Job&gt;
+- Time: Time
+--
++ EventQueue(List&lt;Station&gt;, List&lt;Job&gt;)
++ Start(): void
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1451</x><y>140</y><w>250</w><h>100</h></coordinates><panel_attributes>Event
+--
+- Job: Job
+- Station: Station
+--
++ Event(Job, Station)
+_+ Work(Job, Station, int): void_
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1311</x><y>190</y><w>160</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;140;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1071</x><y>1030</y><w>250</w><h>200</h></coordinates><panel_attributes>Job
+--
+- JobType: JobType
+- Duration: int
+- StartTime: int
+- DeadLine: int
+--
++ Job(String, int, int, JobType)
++ GetDuration(): int
++ GetStartTime(): int
++ GetJobType(): JobType
++ GetDeadline(): int
++ IsJobFinished(): bool
++ GetNextTask(): Task</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1071</x><y>1360</y><w>250</w><h>90</h></coordinates><panel_attributes>JobType
+--
+- JobTypeID: String
++ TaskSequence: Dictionary&lt;int, List&lt;Task&gt;&gt;
+--
++ JobType(String)
++ GetJobTypeID() : String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1201</x><y>1220</y><w>30</w><h>160</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;140</additional_attributes></element><element><id>UMLClass</id><coordinates><x>311</x><y>1030</y><w>250</w><h>150</h></coordinates><panel_attributes>Task
+--
+- TaskType: TaskType
+- Size: double
+- isFinished: bool
+--
++ Task(double, TaskType)
++ GetTaskType(): TaskType
++ GetSize(): double
++ CheckFinished(): bool
++ FinishTask(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>311</x><y>1360</y><w>250</w><h>80</h></coordinates><panel_attributes>TaskType
+--
+- ID: String
+--
++ TaskType(String)
++ GetTaskTypeID(): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>431</x><y>1170</y><w>30</w><h>210</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;190</additional_attributes></element><element><id>UMLClass</id><coordinates><x>611</x><y>530</y><w>390</w><h>320</h></coordinates><panel_attributes>Station
+--
+- Capacity: int
+- FIFOFLAG: char
+- MULTIFLAG: char
+- ExecutableTaskList: List&lt;Task&gt;
+- AcceptedTasks: Queue&lt;Task&gt;
+- TasksOnWaiting: Queue&lt;Task&gt;
+- _executableTaskInfo:
+Dictionary&lt;Task,
+KeyValuePair&lt;string,double&gt;&gt;
++ ExecutableTaskInfo: Dictionary&lt;Task,KeyValuePair&lt;string,double&gt;&gt;
++ ExecutableTasks: List&lt;Task&gt;
++ ExecutedTimes: List&lt;double&gt;
+--
++ Station(String, int, char, char, Action&lt;Station&gt;)
+- IsStationFull(): bool
++ GetCapacity(): int
++ GetFifoFlag(): char
++ GetMultiFlag(): char
++ AcceptTask(Task): void
++ Execute(Task, int): void
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>401</x><y>680</y><w>230</w><h>370</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>210;10;10;10;10;350</additional_attributes></element><element><id>Relation</id><coordinates><x>1261</x><y>270</y><w>270</w><h>920</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;230;250;230;250;900;60;900</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1071</x><y>640</y><w>250</w><h>90</h></coordinates><panel_attributes>Program
+bg=#fbce73
+--
+_+ Tasks: List&lt;Task&gt;_
+_+ Jobs: List&lt;Job&gt;_
+_+ Stations: List&lt;Station&gt;_
+--
++/ Main(args: String[]): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>461</x><y>720</y><w>700</w><h>330</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>680;10;680;190;10;190;10;310</additional_attributes></element><element><id>Relation</id><coordinates><x>991</x><y>680</y><w>100</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1191</x><y>720</y><w>30</w><h>330</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;310</additional_attributes></element><element><id>Relation</id><coordinates><x>1191</x><y>270</y><w>200</w><h>390</h></coordinates><panel_attributes>lt=&lt;.
+
+
+
+  Starts                                         </panel_attributes><additional_attributes>10;10;10;370</additional_attributes></element><element><id>Relation</id><coordinates><x>851</x><y>270</y><w>350</w><h>280</h></coordinates><panel_attributes>lt=&lt;.
+Assigns Jobs.                                    </panel_attributes><additional_attributes>10;260;10;230;280;230;280;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>691</x><y>140</y><w>250</w><h>80</h></coordinates><panel_attributes>Time
+--
+- CurrentTime: static int
+--
+_+ GetCurrentTime(): int_
++ Tick(): void</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>931</x><y>180</y><w>160</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>140;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>681</x><y>1030</y><w>250</w><h>100</h></coordinates><panel_attributes>&lt;&lt;Abstract&gt;&gt;
+Entity
+bg=#a6fdf9
+--
+# ID: String
+--
++ Entity(String)
++ GetID(): String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>801</x><y>840</y><w>30</w><h>210</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;190;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>851</x><y>1120</y><w>240</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50;220;50</additional_attributes></element><element><id>UMLClass</id><coordinates><x>681</x><y>1360</y><w>250</w><h>80</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+ICreator
+bg=#d0aafb
+--
+
+--
++ CreateEntity(object): T
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>401</x><y>1600</y><w>400</w><h>110</h></coordinates><panel_attributes>JCreator
+--
+- JobTypeInfo:
+Dictionary&lt;string,
+List&lt;List&lt;KeyValuePair&lt;string, double&gt;&gt;&gt;&gt;
+--
++ JCreator(Dictionary&lt;string, List&lt;List&lt;KeyValuePair&lt;string, double&gt;&gt;&gt;&gt;)
++CreateEntity(object): Job
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>821</x><y>1600</y><w>210</w><h>60</h></coordinates><panel_attributes>SCreator
+--
+
+--
+CreateEntity(object): Station
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2081</x><y>790</y><w>170</w><h>170</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>150;10;150;130;10;130;10;150</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2091</x><y>550</y><w>320</w><h>250</h></coordinates><panel_attributes>&lt;&lt;Abstract&gt;&gt;
+FileDataParser
+bg=#a6fdf9
+--
+# FILENAME: String
+# FILEEXTENSION: String
+# Finder: IFinder&lt;SolutionFinder&gt;
+--
++ AssignFile(String, String): void
++ FileDataParser(IFinder&lt;SolutionFinder&gt;)
++ &lt;abstract&gt; Parse(): object
+# &lt;abstract&gt; ReadLinesInFiles(): Dictionary&lt;int, string&gt;
++ &lt;abstract&gt; PrintResults(): void
+# GetFilePath(): String
+- SolutionDirectory(): String
+# LogWarning(String, int): void
+_# HandleParenthesisAndWhiteSpaces(String): String_
+_# RemoveSpecialCharacters(String): String_
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1921</x><y>940</y><w>330</w><h>110</h></coordinates><panel_attributes>JobFileDataParser
+--
+- ParseData: Dictionary&lt;string, Dictionary&lt;string, string&gt;&gt;
+--
++ JobFileDataParser(IFinder&lt;SolutionFinder&gt;)
+#/ ReadLinesInFiles(): Dictionary&lt;int, string&gt;
++/ Parse(): object
++/ PrintResults(): void
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>2271</x><y>940</y><w>340</w><h>150</h></coordinates><panel_attributes>WorkFlowDataParser
+--
+- ParseData:
+Tuple&lt;Dictionary&lt;string, double&gt;,
+Dictionary&lt;string, List&lt;List&lt;KeyValuePair&lt;string, double&gt;&gt;&gt;&gt;, 
+Dictionary&lt;string, Dictionary&lt;string, string&gt;&gt;&gt;
+--
++ WorkFlowDataParser(IFinder&lt;SolutionFinder&gt;)
+#/ ReadLinesInFiles(): Dictionary&lt;int, string&gt;
++/ Parse(): object
++/ PrintResults(): void
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2281</x><y>790</y><w>190</w><h>170</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;130;170;130;170;150</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1631</x><y>940</y><w>250</w><h>80</h></coordinates><panel_attributes>&lt;&lt;Interface&gt;&gt;
+IFinder
+bg=#d0aafb
+--
+
+--
++ FindDirectory(): String
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1621</x><y>1110</y><w>250</w><h>60</h></coordinates><panel_attributes>SolutionFinder
+--
+
+--
++ FindDirectory(): String
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1751</x><y>1010</y><w>100</w><h>120</h></coordinates><panel_attributes>lt=&lt;.
+  Implements</panel_attributes><additional_attributes>10;10;10;100</additional_attributes></element><element><id>Relation</id><coordinates><x>1771</x><y>700</y><w>340</w><h>260</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>320;10;10;10;10;240</additional_attributes></element><element><id>Relation</id><coordinates><x>1311</x><y>690</y><w>470</w><h>270</h></coordinates><panel_attributes>lt=&lt;.
+Passes to FileDataParser                                  </panel_attributes><additional_attributes>10;20;420;20;420;250</additional_attributes></element><element><id>Relation</id><coordinates><x>1311</x><y>640</y><w>800</w><h>40</h></coordinates><panel_attributes>lt=&lt;.
+Uses for Parsing</panel_attributes><additional_attributes>780;20;10;20</additional_attributes></element><element><id>Relation</id><coordinates><x>801</x><y>210</y><w>60</w><h>340</h></coordinates><panel_attributes>lt=&lt;.
+ Uses</panel_attributes><additional_attributes>10;10;10;320</additional_attributes></element><element><id>Relation</id><coordinates><x>801</x><y>1120</y><w>70</w><h>260</h></coordinates><panel_attributes>lt=&lt;.
+
+ Creates</panel_attributes><additional_attributes>10;10;10;240</additional_attributes></element><element><id>Relation</id><coordinates><x>831</x><y>840</y><w>350</w><h>210</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-
+                                               Processes</panel_attributes><additional_attributes>30;10;30;170;330;170;330;190</additional_attributes></element><element><id>Relation</id><coordinates><x>831</x><y>1430</y><w>120</w><h>190</h></coordinates><panel_attributes>lt=&lt;.
+      Implements</panel_attributes><additional_attributes>10;10;10;150;100;150;100;170</additional_attributes></element><element><id>Relation</id><coordinates><x>631</x><y>1430</y><w>240</w><h>190</h></coordinates><panel_attributes>lt=&lt;.
+bg=#fde0a6
+Implements                               </panel_attributes><additional_attributes>150;10;150;150;10;150;10;170</additional_attributes></element><element><id>Relation</id><coordinates><x>851</x><y>720</y><w>340</w><h>660</h></coordinates><panel_attributes>lt=&lt;.
+
+Uses</panel_attributes><additional_attributes>10;640;10;610;170;610;170;240;320;240;320;10</additional_attributes></element></diagram>
