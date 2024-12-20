@@ -30,9 +30,8 @@ public class Program
             parser = new WorkFlowDataParser(finder);
             // Take user input to find correct file name 
             Console.WriteLine("Please enter your workflow file name with its extension...");
-            //var input = Console.ReadLine();
-            //parser.AssignFile(input.Split(".").ToList()[0],input.Split(".").ToList()[1]);
-            parser.AssignFile("workflow","txt");
+            var input = Console.ReadLine();
+            parser.AssignFile(input.Split(".").ToList()[0],input.Split(".").ToList()[1]);
             parsedFlow = (
                             (Dictionary<string, double>,
                                 Dictionary<string, List<List<KeyValuePair<string, double>>>>,
@@ -42,8 +41,8 @@ public class Program
         }
         catch(Exception e)
         {
-            Console.WriteLine(e.Message);
-            //Console.WriteLine("There is no such file or directory ! Please try again ...");
+            //Console.WriteLine(e.Message);
+            Console.WriteLine("There is no such file or directory ! Please try again ...");
             continue;
         }
     }
@@ -60,16 +59,15 @@ public class Program
             parser = new JobFileDataParser(finder);
             // Take user input to find correct file name 
             Console.WriteLine("Please enter your job file name with its extension...");
-            //var input = Console.ReadLine();
-            //parser.AssignFile(input.Split(".").ToList()[0],input.Split(".").ToList()[1]);
-            parser.AssignFile("jobfile","txt");
+            var input = Console.ReadLine();
+            parser.AssignFile(input.Split(".").ToList()[0],input.Split(".").ToList()[1]);
             parsedJob = (Dictionary<string, Dictionary<string, string>>)parser.Parse();
             break;
         }
         catch(Exception e)
         {
-            Console.WriteLine(e);
-            //Console.WriteLine("There is no such file or directory ! Please try again ...");
+            //Console.WriteLine(e);
+            Console.WriteLine("There is no such file or directory ! Please try again ...");
             continue;
         }
     }
@@ -111,6 +109,8 @@ public class Program
         Station s = stationCreator.CreateEntity(station);
         if(!s.Equals(null))Stations.Add(s);
     }
+    
+    Console.WriteLine();
     
     EventQueue eventQueue = new EventQueue(Stations,Jobs);
     eventQueue.Start();

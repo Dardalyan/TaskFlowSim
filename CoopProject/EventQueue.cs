@@ -9,6 +9,7 @@ public class EventQueue
     private List<int> StartTimes;
     private List<Job> Jobs;
     private List<Job> JobsInProcess = new List<Job>();
+    private List<Job> FinishedJobs = new List<Job>();
 
     private Time Time = new Time();
 
@@ -28,32 +29,34 @@ public class EventQueue
         {
             Time.Tick();
 
-            if (Time.GetCurrentTime() == 50) break;
-
-
             // Get Current job  with a start time equals to the current time 
             var candidateJob = Jobs.FindAll(j => j.GetStartTime() == Time.GetCurrentTime()).FirstOrDefault()!;
-            if (!JobsInProcess.Contains(candidateJob) && candidateJob != null! && !candidateJob.IsJobFinished())
+            if (!JobsInProcess.Contains(candidateJob) && candidateJob != null! && !candidateJob.IsJobFinished() && !FinishedJobs.Contains(candidateJob))
                 JobsInProcess.Add(Jobs.Find(j => j.GetStartTime() >= Time.GetCurrentTime())!);
-
-
-
+            
             // We select executable task
             Station station = null!;
-
-            IEnumerator<Job> enumerator = JobsInProcess.GetEnumerator();
+            IEnumerator<Job> jEnumerator = JobsInProcess.GetEnumerator();
 
             List<Station> stationsInProcess = new List<Station>();
 
-            while (enumerator.MoveNext())
+            while (jEnumerator.MoveNext())
             {
-                Job j = enumerator.Current;
+                Job j = jEnumerator.Current;
                 IEnumerator<Station> sEnumerator = Stations.GetEnumerator();
-
+                
                 while (sEnumerator.MoveNext())
                 {
                     var s = sEnumerator.Current;
-                    if (s.ExecutableTasks.Contains(j.GetNextTask()))
+                    
+                    // check if job is finished or not then if it is , added it to finished job
+                    Task nextTask = j.GetNextTask();
+                    if (nextTask == null! && !FinishedJobs.Contains(j))
+                    {
+                        FinishedJobs.Add(j);
+                    }
+                    // add station for the next task in current job
+                    if (s.ExecutableTasks.Contains(nextTask))
                     {
                         stationsInProcess.Add(s);
                         break;
@@ -61,19 +64,25 @@ public class EventQueue
                 }
             }
             
+            // If job is finished, then put that job into finished jobs
+            FinishedJobs.ForEach(j =>
+            {
+                JobsInProcess.Remove(j);
+            });
             
+
+            if (JobsInProcess.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("All jobs are finished !");
+                break;
+            }
 
             for (int i = 0; i < JobsInProcess.Count; i++)
             { 
-                
                 Event.Work(JobsInProcess[i], stationsInProcess[i],Time.GetCurrentTime());
             }
             
-            /*
-            // Current event
-            Console.Write(" j: "+JobsInProcess.Count);
-            Console.WriteLine(" s: "+ stationsInProcess.Count);
-            */
         }
     }
 }

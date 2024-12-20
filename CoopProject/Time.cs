@@ -11,8 +11,11 @@ public class Time
 
     public void Tick()
     {
-        CurrentTime++;
+        // Increase Current time  
+        ++CurrentTime;
+        Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine($"Current time: {CurrentTime}");
+        Console.ResetColor();
 
     }
 }

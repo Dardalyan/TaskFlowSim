@@ -33,14 +33,14 @@ public class SCreator : ICreator<Station>
                         {
                             speed = speed.Replace("\u00B1", ""); //-> 3 0.20
                             speedInt = new Random().Next(0, 2) == 0
-                                ? Convert.ToDouble(speed.Split(" ").ToList()[0]) + Convert.ToDouble(speed.Split(" ").ToList()[1])
-                                : Convert.ToDouble(speed.Split(" ").ToList()[0]) - Convert.ToDouble(speed.Split(" ").ToList()[1]);
+                                ? Convert.ToDouble(speed.Split(" ").ToList()[0]) * (100+Convert.ToDouble(speed.Split(" ").ToList()[1]))/100
+                                : Convert.ToDouble(speed.Split(" ").ToList()[0]) * (100-Convert.ToDouble(speed.Split(" ").ToList()[1]))/100;
                         }
                         else
                         {
                             speedInt = Convert.ToInt32(speed);
                         }
-                            
+                        // Save speed as double ...
                         Program.Tasks.FindAll(task => task.GetTaskType().GetTaskTypeID() == stationData.Key).ForEach(
                             task =>
                             {
@@ -49,8 +49,6 @@ public class SCreator : ICreator<Station>
                                     new KeyValuePair<string, double>("speed", speedInt)
                                 );
                             }); 
-
-
                     }
                 }
             });
@@ -60,4 +58,3 @@ public class SCreator : ICreator<Station>
     }
 }
 
-// Program.Tasks.Find(task => task.GetTaskType().GetTaskTypeID() == stationData.Key)!, 

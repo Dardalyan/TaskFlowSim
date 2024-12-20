@@ -8,9 +8,10 @@ public class Station :Entity
     private char FIFOFLAG { get; }
     private char MULTIFLAG { get; }
 
-    private  List<Task>ExecutableTaskList { get; set; }
     private  Queue<Task>AcceptedTasks { set; get; }
     private  Queue<Task> TasksOnWaiting { set; get; }
+    
+    private  Dictionary<Task,int> TaskStartTime  = new Dictionary<Task,int>();
 
     private Dictionary<Task, KeyValuePair<string, double>> _executableTaskInfo; // {instance:{"speed":"3"}}
     public Dictionary<Task,KeyValuePair<string,double>> ExecutableTaskInfo
@@ -20,7 +21,7 @@ public class Station :Entity
     
     //!!!
     public List<Task> ExecutableTasks { set; get; }
-    public List<double> ExecutedTimes { set; get; }
+    public List<double> ExecutionSpeeds { set; get; } 
     
 
     public Station(string stationID, int capacity, char multiflag , char fifoflag, Action<Station>assignExecTinfo):base(stationID)
@@ -36,7 +37,7 @@ public class Station :Entity
         
         
         ExecutableTasks = new List<Task>();
-        ExecutedTimes = new List<double>();
+        ExecutionSpeeds = new List<double>();
         
         _executableTaskInfo.Keys.ToList().ForEach(task =>
         {
@@ -46,7 +47,8 @@ public class Station :Entity
         foreach (var info in _executableTaskInfo)
         {
             double speed = info.Value.Value;
-            ExecutedTimes.Add(speed);
+            //Console.WriteLine($"{info.Key.GetTaskType().GetTaskTypeID()} with {speed} in {ID} .");
+            ExecutionSpeeds.Add(speed);
         }
         
         
@@ -98,8 +100,23 @@ public class Station :Entity
     {
         int index = ExecutableTasks.IndexOf(task);
         
+        if(!TaskStartTime.ContainsKey(task))
+            TaskStartTime.Add(task,time);
+        
+        Console.WriteLine($"{task.GetTaskType().GetTaskTypeID()} entered in {TaskStartTime[task]}th second.");
         Console.WriteLine($"in {ID} , {task.GetTaskType().GetTaskTypeID() } is in process...");
-        if (time + (task.GetSize() / ExecutedTimes[index]) >= Time.GetCurrentTime())
+        double executionDuration = (task.GetSize() / ExecutionSpeeds[index]);
+        
+        Console.WriteLine($"Duratiton of {task.GetTaskType().GetTaskTypeID()} in {ID} is {executionDuration} seconds.");
+        
+        Console.WriteLine($"{ID}'s Execution speed for {task.GetTaskType().GetTaskTypeID()}: "+ ExecutionSpeeds[index] + " second.");
+        
+        // If the time has come for the task, then remove it from the queue.
+        if (Time.GetCurrentTime() - TaskStartTime[task] <= Convert.ToInt32(executionDuration))
+            /*
+             NOTE: We couldn't solve this equation problem 
+             When we change the equation to == it starts infinite loop !! 
+             */
         {
             AcceptedTasks.Dequeue().FinishTask();
             Console.WriteLine($"The execution of  {task.GetTaskType().GetTaskTypeID()} is finished.");

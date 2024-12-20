@@ -8,6 +8,8 @@ public class Job : Entity
     private int Duration { get; }
     private int StartTime { get; }
 
+    private bool IsFinieshed = false;
+
     private int Deadline { get; set; }
 
     public Job(string jobId, int startTime, int duration, JobType jobType) : base(jobId)
@@ -40,17 +42,21 @@ public class Job : Entity
 
     public bool IsJobFinished()
     {
-        return JobType.TaskSequence.Count == 0 || JobType.TaskSequence[0].Count == 0;
+        return IsFinieshed;
     }
 
+    // If the Task is Done, then remove it from the sequence and return the first value again until the list becomes empty.
     public Task GetNextTask()
     {
         if (JobType.TaskSequence[0].Count >= 1)
             if(JobType.TaskSequence[0][0].CheckFinished()) JobType.TaskSequence[0].RemoveAt(0);
 
         if (JobType.TaskSequence[0].Count == 0 || JobType.TaskSequence[0] == null!)
+        {
+            IsFinieshed = true;
             return null!;
-        else return JobType.TaskSequence[0][0];
+        }
+        return JobType.TaskSequence[0][0];
 
 
     }
