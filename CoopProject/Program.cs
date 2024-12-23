@@ -13,11 +13,13 @@ public class Program
     public static void Main(String[] args)
 {
     // Parsed workflow data
-    (Dictionary<string, double>, Dictionary<string, List<List<KeyValuePair<string, double>>>>, 
+    (Dictionary<string, double>, Dictionary<string, List<List<KeyValuePair<string, double>>>>,
         Dictionary<string, Dictionary<string, string>>) parsedFlow = (null!, null!, null!);
-    
+
+
     // Parsed job file data
-    Dictionary<string, Dictionary<string, string>> parsedJob = null!;
+    Dictionary<string, Dictionary<string, string>> parsedJob = null!; 
+    
     
     IFinder<SolutionFinder> finder = new SolutionFinder();
     FileDataParser parser = null!;
@@ -32,6 +34,7 @@ public class Program
             Console.WriteLine("Please enter your workflow file name with its extension...");
             var input = Console.ReadLine();
             parser.AssignFile(input.Split(".").ToList()[0],input.Split(".").ToList()[1]);
+            //parser.AssignFile("workflow","txt"); // For test ...
             parsedFlow = (
                             (Dictionary<string, double>,
                                 Dictionary<string, List<List<KeyValuePair<string, double>>>>,
@@ -61,6 +64,7 @@ public class Program
             Console.WriteLine("Please enter your job file name with its extension...");
             var input = Console.ReadLine();
             parser.AssignFile(input.Split(".").ToList()[0],input.Split(".").ToList()[1]);
+            //parser.AssignFile("jobfile","txt"); // For test...
             parsedJob = (Dictionary<string, Dictionary<string, string>>)parser.Parse();
             break;
         }

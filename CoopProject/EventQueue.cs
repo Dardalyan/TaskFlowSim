@@ -52,7 +52,7 @@ public class EventQueue
                     // check if job is finished or not then if it is , added it to finished job
                     Task nextTask = j.GetNextTask();
                     if (nextTask == null! && !FinishedJobs.Contains(j))
-                    {
+                    {  
                         FinishedJobs.Add(j);
                     }
                     // add station for the next task in current job

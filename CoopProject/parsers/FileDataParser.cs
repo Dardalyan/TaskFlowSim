@@ -1,3 +1,4 @@
+using System.Buffers.Text;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using CoopProject.util;
@@ -19,7 +20,8 @@ public abstract class FileDataParser
     {
         Finder = finder;
     }
-    public abstract object Parse();
+
+    public abstract object Parse(); 
     protected abstract Dictionary<int, string> ReadLinesInFiles();
     public abstract void PrintResults();
     

@@ -28,8 +28,10 @@ public class Event
         if(j.GetID() == "Job5") Console.ForegroundColor = ConsoleColor.Green;
             
         // Get next one
-        Task t = j.GetNextTask();
-        if (t != null! )
+        Task t = j.GetCurrentTask();
+        if(t.CheckFinished())
+            Console.WriteLine("Bitmiş olmasına rağmen "+t.GetTaskType().GetTaskTypeID()+" hala execurte ediliyor !!!!");
+        if (t != null!  && !t.CheckFinished())
         {
             Console.WriteLine($"{j.GetID()} processing...");
             s.AcceptTask(t);
