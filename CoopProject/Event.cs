@@ -7,17 +7,6 @@ using System.Collections;
 
 public class Event
 {
-
-    private Job Job;
-    private Station Station;
-
-    public Event(Job j, Station s)
-    {
-        Job = j;
-        Station = s;
-    }
-
-
     public static void Work(Job j, Station s,int time)
     {
         // Just increase visibility for each job 

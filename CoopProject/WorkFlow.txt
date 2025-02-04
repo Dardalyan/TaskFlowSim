@@ -2,11 +2,11 @@
     
     (  
     
-                        TASKTYPES 
+                        @TASKTYPES 
     T1 
             T2 2    
     T3                 # 2.5    
-                   @ T4 T5  
+                    T4 T5  
     -4              T1 1 
     
     

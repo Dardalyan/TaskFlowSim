@@ -11,7 +11,7 @@ public class Program
     private static List<Station>Stations = new List<Station>();
     
     public static void Main(String[] args)
-{
+    {
     // Parsed workflow data
     (Dictionary<string, double>, Dictionary<string, List<List<KeyValuePair<string, double>>>>,
         Dictionary<string, Dictionary<string, string>>) parsedFlow = (null!, null!, null!);
