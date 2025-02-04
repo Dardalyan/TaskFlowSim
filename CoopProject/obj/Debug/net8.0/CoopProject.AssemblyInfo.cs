@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CoopProject")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+928fa930769f78ec7df4c423673100fc9c2dc72b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+162d0031c23491cab31d77235c3293a0f34c3b33")]
 [assembly: System.Reflection.AssemblyProductAttribute("CoopProject")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CoopProject")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
